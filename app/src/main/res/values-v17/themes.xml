@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="InputFields">
+        <item name="background">@drawable/rounded_corners_shape</item>
+        <item name="android:layout_marginStart">@dimen/_20sdp</item>
+
+    </style>
+</resources>
