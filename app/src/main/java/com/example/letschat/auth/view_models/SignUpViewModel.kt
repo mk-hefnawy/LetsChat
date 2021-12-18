@@ -19,6 +19,7 @@ class SignUpViewModel(
     var email: String = ""
     var password: String = ""
 
+
     val signUpResult = MutableLiveData<SignUpResultModel>()
 
 
@@ -43,6 +44,7 @@ class SignUpViewModel(
         signUpRepo = SignUpRepository(user)
         validator = AuthValidator(user)
     }
+
 
     fun signUp(){
         print(user.userName)

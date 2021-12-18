@@ -67,7 +67,6 @@ class FireBaseService(var user: User){
             "id" to userId,
             "userName" to user.userName,
             "email" to user.email,
-            //"password" to user.password // because password must not be visible in fire-store
         )
         db.collection("users")
             .document(this.user.email)

@@ -9,6 +9,9 @@
     <string name="log_out">Log out</string>
     <string name="welcome">Welcome</string>
     <string name="already_have_an_account">Already have an account?</string>
+    <string name="enter_friend_user_name">Enter friend user name</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
 
 
 </resources>

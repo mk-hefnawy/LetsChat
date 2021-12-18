@@ -3,6 +3,7 @@ package com.example.letschat.home.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -19,7 +20,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity() , View.OnClickListener{
 
     lateinit var appContainer: AppContainer
     private lateinit var logOutButton: Button
@@ -38,11 +39,20 @@ class HomeActivity : AppCompatActivity() {
         homeBinding.lifecycleOwner = this
 
         // userManager = appContainer.userManager
+        setClickListeners()
 
         logOutButton = homeBinding.logoutButton
         logOutButton.setOnClickListener{ view ->
             signOut(appContainer.auth)
         }
+    }
+
+    private fun setClickListeners(){
+        homeBinding.addFriendButton.setOnClickListener(this)
+    }
+
+    private fun onAddFriendButtonClicked() {
+
     }
 
     private fun signOut(auth: FirebaseAuth) {
@@ -59,5 +69,14 @@ class HomeActivity : AppCompatActivity() {
         logOutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(logOutIntent)
     }
+
+    override fun onClick(view: View?) {
+        when (view){
+            homeBinding.addFriendButton -> onAddFriendButtonClicked()
+
+        }
+    }
+
+
 
 }
