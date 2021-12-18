@@ -26,30 +26,22 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var homeBinding: ActivityHomeBinding
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var userManager: UserManager
-    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    val user = mutableMapOf<String, Any>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         appContainer = (application as MyApplication).appContainer
         homeBinding = DataBindingUtil.setContentView(this, R.layout.activity_home)
-        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        homeViewModel = appContainer.homeViewModel
         homeBinding.viewModel = homeViewModel
         homeBinding.lifecycleOwner = this
 
-        userManager = appContainer.userManager
-        userManager.getUserInfo("ho5a")
-
-        println("--------------------------------------------------------------")
-        println(auth.currentUser?.email)
-
-        // createUserInFireStore(db)
+        // userManager = appContainer.userManager
 
         logOutButton = homeBinding.logoutButton
         logOutButton.setOnClickListener{ view ->
-            signOut(auth)
+            signOut(appContainer.auth)
         }
     }
 
@@ -58,7 +50,6 @@ class HomeActivity : AppCompatActivity() {
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
-
 
         val signInGoogleUser = GoogleSignIn.getClient(this, gso)
 
@@ -69,13 +60,4 @@ class HomeActivity : AppCompatActivity() {
         startActivity(logOutIntent)
     }
 
-    private fun createUserInFireStore(db: FirebaseFirestore) {
-        // auth.currentUser?.uid?.let { user.put("Id", it) }
-        user.put("FirstName", "HHHHHHHHHHHHHHHHHHHH")
-        user.put("LastName", "Khaled")
-        user.put("Age", "23")
-
-        db.collection("users")
-            .add(user)
-    }
 }

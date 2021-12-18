@@ -9,16 +9,19 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.letschat.MyApplication
 import com.example.letschat.home.ui.HomeActivity
 import com.example.letschat.R
 import com.example.letschat.auth.models.SignUpResultModel
 import com.example.letschat.auth.view_models.SignUpViewModel
 import com.example.letschat.databinding.ActivitySignUpBinding
+import com.example.letschat.dependency_injection.AppContainer
 
 
 class SignUpActivity : AppCompatActivity(), View.OnClickListener{
 
 
+    lateinit var appContainer: AppContainer
     private lateinit var signUpBinding: ActivitySignUpBinding
     private lateinit var signUpViewModel: SignUpViewModel
 
@@ -29,8 +32,9 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        appContainer = (application as MyApplication).appContainer
         signUpBinding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up)
-        signUpViewModel = ViewModelProvider(this).get(SignUpViewModel::class.java)
+        signUpViewModel = appContainer.signUpViewModel
         signUpBinding.viewModel = signUpViewModel
         signUpBinding.lifecycleOwner = this
 

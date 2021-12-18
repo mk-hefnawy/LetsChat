@@ -4,18 +4,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.letschat.auth.helper_classes.AuthValidator
+import com.example.letschat.auth.helper_classes.FederatedLoginManager
 import com.example.letschat.auth.server.SignUpRepository
 import com.example.letschat.auth.models.SignUpResultModel
+import com.example.letschat.auth.server.LoginRepository
 import com.example.letschat.user.User
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(
+    var user: User,
+    private var validator: AuthValidator,
+    private var signUpRepo: SignUpRepository,
+) : ViewModel() {
     var userName: String = ""
     var email: String = ""
     var password: String = ""
 
-    lateinit var user: User
-    var validator=  AuthValidator(User("", "", ""))
-    var signUpRepo=  SignUpRepository(User("", "", ""))
     val signUpResult = MutableLiveData<SignUpResultModel>()
 
 
