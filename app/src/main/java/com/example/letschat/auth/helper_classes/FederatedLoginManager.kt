@@ -3,12 +3,12 @@ package com.example.letschat.auth.helper_classes
 import android.content.Context
 import com.example.letschat.R
 import com.example.letschat.user.User
-import com.example.letschat.auth.server.LoginRepository
+import com.example.letschat.auth.server.remote.LoginRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 
-class FederatedLoginManager(user: User): LoginRepository(user) {
+class FederatedLoginManager(user: User): LoginRepository() {
 
 
     fun loginWithGoogle(context: Context){

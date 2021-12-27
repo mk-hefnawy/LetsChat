@@ -1,8 +1,22 @@
 package com.example.letschat.user
 
-data class User(var userName: String, var email: String, var password: String){
-    var id: String? = null
-    var birthData: String? = null
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
+import java.io.Serializable
 
-    // any non-necessary data
+@Entity
+data class User(
+    var uid: String = "",
+    var docId: String = "",
+    var userName: String = "",
+    var email: String = "",
+
+    @Ignore
+    var password: String = ""
+   ): Serializable{
+
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+
 }

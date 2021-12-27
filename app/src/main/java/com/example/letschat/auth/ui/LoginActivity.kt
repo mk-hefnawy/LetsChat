@@ -3,6 +3,7 @@ package com.example.letschat.auth.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -29,7 +30,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var  googleSignInButton: MaterialButton
 
     private companion object {
-        private const val TAG = "LoginActivity"
+        private const val TAG = "LoginActivityHere"
         private const val GOOGLE_SIGN_IN_REQUEST_CODE = 300
     }
 
@@ -63,6 +64,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
             val (isPasswordValid, message) = loginViewModel.isPasswordValid()
             if (!isPasswordValid) showPasswordError(message)
             else {
+                Log.d(TAG, "onLoginButtonClicked Else Block")
                 loginViewModel.loginWithEmailAndPassword()
                 loginViewModel.loginLiveData.observe(this, Observer {
                     updateUiBasedOnLoginResult(it)
@@ -185,6 +187,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
     private fun updateUiBasedOnLoginResult(loginResult : LoginResultModel?) {
         if (loginResult?.isLoginSuccessful == true){ // can't be without the (== true) because its a Boolean? not Boolean
             Toast.makeText(this, "Login was successful", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Login was Successful")
             startHomeActivity(loginResult.userId)
         }
         else{
@@ -201,6 +204,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         intent.putExtra("userId", userId)
         startActivity(intent)
+        finish()
     }
 }
 

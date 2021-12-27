@@ -3,6 +3,7 @@ package com.example.letschat.home.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.databinding.DataBindingUtil
@@ -27,7 +28,7 @@ class HomeActivity : AppCompatActivity() , View.OnClickListener{
     private lateinit var homeBinding: ActivityHomeBinding
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var userManager: UserManager
-
+    private val TAG = "HomeActivityHere"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +41,8 @@ class HomeActivity : AppCompatActivity() , View.OnClickListener{
 
         // userManager = appContainer.userManager
         setClickListeners()
+        println("=========================")
+        println(appContainer.auth.currentUser?.displayName)
 
         logOutButton = homeBinding.logoutButton
         logOutButton.setOnClickListener{ view ->
@@ -64,9 +67,13 @@ class HomeActivity : AppCompatActivity() , View.OnClickListener{
         val signInGoogleUser = GoogleSignIn.getClient(this, gso)
 
         auth.signOut()
+        Log.d(TAG, "after auth.signOut()")
         signInGoogleUser.signOut()
+        Log.d(TAG, "after signInGoogleUser.signOut()")
         val logOutIntent = Intent(this, LoginActivity::class.java)
         logOutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        Log.d(TAG, "before startActivity(logOutIntent)")
+        Log.d(TAG, auth.currentUser?.email.toString())
         startActivity(logOutIntent)
     }
 
@@ -76,7 +83,5 @@ class HomeActivity : AppCompatActivity() , View.OnClickListener{
 
         }
     }
-
-
 
 }

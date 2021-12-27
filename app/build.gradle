@@ -43,14 +43,15 @@ android {
 
 dependencies {
     // removed implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation "androidx.activity:activity-ktx:1.2.0-alpha03"
+    implementation "androidx.activity:activity-ktx:1.4.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.core:core-ktx:1.7.0'
 
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -59,7 +60,7 @@ dependencies {
     implementation 'com.intuit.sdp:sdp-android:1.0.6'
 
     // google play
-    implementation 'com.google.android.gms:play-services-auth:19.2.0'
+    implementation 'com.google.android.gms:play-services-auth:20.0.0'
 
     // fire base bom
     // By using the Firebase Android BoM, your app will always use compatible versions of the Firebase Android libraries.
@@ -67,7 +68,7 @@ dependencies {
     // fire base auth
     implementation "com.google.firebase:firebase-auth-ktx:21.0.1"
     // google play services auth
-    implementation "com.google.android.gms:play-services-auth:19.2.0"
+    implementation "com.google.android.gms:play-services-auth:20.0.0"
     // fire-store
     implementation 'com.google.firebase:firebase-firestore-ktx:24.0.0'
 
@@ -79,7 +80,17 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
 
     // live data
-
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0"
 
+    // Room
+    def roomVersion = "2.4.0"
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    // Coroutines for room
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // Navigation
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
 }

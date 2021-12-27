@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.letschat.MyApplication
 import com.example.letschat.home.ui.HomeActivity
 import com.example.letschat.R
@@ -16,6 +17,11 @@ import com.example.letschat.auth.models.SignUpResultModel
 import com.example.letschat.auth.view_models.SignUpViewModel
 import com.example.letschat.databinding.ActivitySignUpBinding
 import com.example.letschat.dependency_injection.AppContainer
+import com.example.letschat.user.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class SignUpActivity : AppCompatActivity(), View.OnClickListener{
@@ -77,7 +83,7 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener{
                        // start the sign up stuff
                        signUpViewModel.signUp()
                        signUpViewModel.signUpResult.observe(this, Observer {
-                           updateUiBasedOnSignUpResult(it)
+                           handleSignUpResult(it)
                        })
                    }
                 }
@@ -85,10 +91,11 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener{
 
     }
 
-    private fun updateUiBasedOnSignUpResult(signUpResult : SignUpResultModel?) {
+    private fun handleSignUpResult(signUpResult : SignUpResultModel?) {
         if (signUpResult?.isSignUpSuccessful == true){ // can't be with the (== true) because its a Boolean? not Boolean
-            Toast.makeText(this, "Sign up was successful", Toast.LENGTH_SHORT).show()
-            startHomeActivity(signUpResult.userId)
+            // Add User To Room
+            addUserToRoomDatabase(signUpResult.user!!)
+
         }
         else{
             // Toast.makeText(this, "Sign up failed", Toast.LENGTH_SHORT).show()
@@ -96,19 +103,38 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener{
         }
     }
 
-    private fun startHomeActivity(userId: String) {
+    private fun addUserToRoomDatabase(user: User) {
+        val thisActivity = this
+        lifecycleScope.launch(Dispatchers.Main) {
+        signUpViewModel.addUserToRoomDatabase(user)
+        signUpViewModel.insertStatusLiveData.observe(thisActivity, {
+            if (it != -1L) {
+                Log.d("Here", "Room Success")
+                Log.d("Here", "User in Room with id: $it")
+                updateUiForLoggedInUser(user)
+            }
+        })
+    }}
+
+    private fun updateUiForLoggedInUser(user: User) {
+        Toast.makeText(this, "Sign up was successful", Toast.LENGTH_SHORT).show()
+        startHomeActivity(user)
+    }
+
+    private fun startHomeActivity(user: User) {
         val intent = Intent(this, HomeActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        intent.putExtra("userId", userId)
+        // intent.putExtra("userId", userId)
         startActivity(intent)
+        finish()
     }
 
     private fun showUserNameError(message: String) {
-       signUpBinding.signUpUserNameField.setError(message)
+        signUpBinding.signUpUserNameField.error = message
     }
 
     private fun showEmailError(message: String) {
-        signUpBinding.signUpEmailField.setError(message)
+        signUpBinding.signUpEmailField.error = message
     }
 
     private fun showPasswordError(message: String) {
@@ -126,6 +152,7 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener{
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        finish()
     }
 
 

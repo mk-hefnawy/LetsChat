@@ -24,6 +24,7 @@ class UserManager(val auth: FirebaseAuth, val db: FirebaseFirestore) {
     }
 
     private fun getUserEmail(): String{
+
         return auth.currentUser?.email.toString()
 
     }

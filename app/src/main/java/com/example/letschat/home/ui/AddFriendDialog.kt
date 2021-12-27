@@ -5,18 +5,19 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import com.example.letschat.MyApplication
 import com.example.letschat.databinding.DialougeAddFriendBinding
+import com.example.letschat.dependency_injection.AppContainer
 import com.example.letschat.home.view_models.HomeViewModel
 
-class AddFriendDialog (context: Context, private val layoutId: Int): Dialog(context), View.OnClickListener {
+class AddFriendDialog (context: Context, val homeViewModel: HomeViewModel, private val layoutId: Int): Dialog(context), View.OnClickListener {
 
     private lateinit var binding: DialougeAddFriendBinding
-    private lateinit var homeViewModel: HomeViewModel
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layoutId)
+
         setClickListeners()
     }
 
@@ -33,6 +34,12 @@ class AddFriendDialog (context: Context, private val layoutId: Int): Dialog(cont
     }
 
     private fun onOkButtonClicked() {
+        val (isUserNameValid, message) = homeViewModel.isUserNameValid()
+        if (isUserNameValid) homeViewModel.addFriend()
+        else showErrorMessage(message)
+    }
 
+    private fun showErrorMessage(message: String) {
+        binding.editTextFriendUserName.error = message
     }
 }

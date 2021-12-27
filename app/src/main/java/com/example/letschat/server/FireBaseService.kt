@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class FireBaseService(var user: User){
+class FireBaseService(){
 
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
@@ -21,38 +21,41 @@ class FireBaseService(var user: User){
     val signInResultLiveData: MutableLiveData<LoginResultModel> = MutableLiveData()
 
 
-    fun signUp() {
+    fun signUp(userName: String, email: String, password: String) {
+        Log.d("Here", "Email: $email Password: $password")
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("Here", "Task is Successful")
+                    val userId = auth.currentUser?.uid.toString()
+                    val user = User(userId, "", userName, email)
+                    addUserToFirestore(user)
 
-    auth.createUserWithEmailAndPassword(user.email, user.password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val userId = auth.currentUser?.uid.toString()
-                addUserToFirestore(userId)
-
-            } else {
-                sendUserCreationError()
-                print(task.exception)
+                } else {
+                    Log.d("Here", "Task Failed")
+                    sendUserCreationError()
+                    print(task.exception)
+                }
             }
-        }
     }
 
-    fun loginWithEmailAndPassword() {
-        auth.signInWithEmailAndPassword(user.email, user.password)
+    fun loginWithEmailAndPassword(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     println("==========")
-                    println("Sign with Email and Password was Successful")
+                    Log.d("LoginActivityHere","Sign Successful")
                     val userId = auth.currentUser?.uid.toString()
                     sendSignInResult(LoginResultModel(true, userId))
 
                 } else {
                     println("==========")
-                    println("Sign with Email and Password Failed")
+                    Log.d("LoginActivityHere","Sign Failed")
                     sendSignInResult(LoginResultModel(false, ""))
                 }
             }
             .addOnFailureListener {it ->
-                println("----------------------------------------")
+                Log.d("LoginActivityHere","Sign in Task Failed")
                 println(it.stackTrace)
             }
 
@@ -62,19 +65,18 @@ class FireBaseService(var user: User){
 
     }
 
-     private fun addUserToFirestore(userId: String){
-         val user = hashMapOf(
-            "id" to userId,
+     private fun addUserToFirestore(user: User){
+         val theUser = hashMapOf(
+            "uid" to user.uid,
             "userName" to user.userName,
             "email" to user.email,
         )
         db.collection("users")
-            .document(this.user.email)
-            .set(user)
+            .add(theUser)
             .addOnSuccessListener { documentReference ->
-                // Log.v("TAG", "DocumentSnapshot added with ID: ${documentReference.id}")
-                Log.v("TAG", "DocumentSnapshot added with ID: ${this.user.userName}")
-                notifyUiThatUserWasCreated(userId)
+
+                user.docId = documentReference.id
+                notifyUiThatUserWasCreated(user)
 
             }
             .addOnFailureListener { e ->
@@ -83,16 +85,16 @@ class FireBaseService(var user: User){
             }
     }
 
-     private fun notifyUiThatUserWasCreated(userId: String){
-        signUpResult.value = SignUpResultModel(true, "", userId)
+     private fun notifyUiThatUserWasCreated(user: User){
+        signUpResult.value = SignUpResultModel(true, "", user)
     }
 
      private fun sendUserCreationError(){
-        signUpResult.value = SignUpResultModel(false, "CreationError", "")
+        signUpResult.value = SignUpResultModel(false, "CreationError", null)
     }
 
      private fun sendFireStoreRegisterError(){
-        signUpResult.value = SignUpResultModel(false, "FireStoreRegisterError", "")
+        signUpResult.value = SignUpResultModel(false, "FireStoreRegisterError", null)
     }
 
      fun isUserAlreadyLoggedIn(): Pair<Boolean, String>{
@@ -119,6 +121,10 @@ class FireBaseService(var user: User){
                     println("Email is sent to $email")
                 }
             })
+    }
+
+    fun addFriend(userName: String) {
+
     }
 
 

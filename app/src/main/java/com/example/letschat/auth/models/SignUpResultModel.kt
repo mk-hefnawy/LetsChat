@@ -1,3 +1,7 @@
 package com.example.letschat.auth.models
 
-data class SignUpResultModel(val isSignUpSuccessful: Boolean, val errorType: String, val userId: String)
+import com.example.letschat.user.User
+
+data class SignUpResultModel(val isSignUpSuccessful: Boolean,
+                             val errorType: String,
+                             val user: User?)

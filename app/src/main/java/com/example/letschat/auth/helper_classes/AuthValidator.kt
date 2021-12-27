@@ -5,23 +5,23 @@ import com.example.letschat.user.User
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-open class AuthValidator(var user: User) {
+open class AuthValidator() {
 
-    fun isEmailValid(): Pair<Boolean, String>{
+    fun isEmailValid(email: String): Pair<Boolean, String>{
         // Empty check
-        if (user.email.isEmpty()) return Pair(false, "Please enter your email")
+        if (email.isEmpty()) return Pair(false, "Please enter your email")
 
         // Validation check
-        if (!Patterns.EMAIL_ADDRESS.matcher(user.email).matches()) return Pair(false, "Please enter a valid email")
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) return Pair(false, "Please enter a valid email")
 
         return Pair(true, "")
     }
 
-    fun isPasswordValid(): Pair<Boolean, String>{
+    fun isPasswordValid(password: String): Pair<Boolean, String>{
         // Empty check
-        if (user.password.isEmpty()) return Pair(false, "Please enter your password")
+        if (password.isEmpty()) return Pair(false, "Please enter your password")
         // Validation check
-        if (!isValidPassword(user.password)) return Pair(false,
+        if (!isValidPassword(password)) return Pair(false,
             "Password must have at least one digit, one upper-case letter, one lower-case letter, and one special character")
         return Pair(true, "")
     }
@@ -38,11 +38,15 @@ open class AuthValidator(var user: User) {
         return matcher.matches()
 
     }
-    fun isUserNameValid(): Pair<Boolean, String>{
+    fun isUserNameValid(userName: String): Pair<Boolean, String>{
         // Empty check
-        if (user.userName.isEmpty()) return Pair(false, "Please enter your user name")
+        if (userName.isEmpty()) return Pair(false, "Please enter your user name")
+
         // Validation check
-        // check if it is already used :(
+            // check if it is already used :(
+
+            // check if it is the userName of the current user // wil need RemoteValidator class
+
         return Pair(true, "")
     }
 }
