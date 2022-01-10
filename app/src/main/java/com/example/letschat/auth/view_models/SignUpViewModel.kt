@@ -6,17 +6,17 @@ import androidx.lifecycle.ViewModel
 import com.example.letschat.auth.helper_classes.AuthValidator
 import com.example.letschat.auth.server.remote.SignUpRepository
 import com.example.letschat.auth.models.SignUpResultModel
-import com.example.letschat.auth.server.local.user.LocalUserRepository
+import com.example.letschat.auth.server.local.user.LocalAuthRepository
+import com.example.letschat.other.Event
+import com.example.letschat.other.SingleLiveEvent
 import com.example.letschat.user.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.withContext
 
 class SignUpViewModel(
-    var user: User,
     private val validator: AuthValidator,
     private var signUpRepo: SignUpRepository,
-    private val localUserRepository: LocalUserRepository
+    private val localAuthRepository: LocalAuthRepository
 ) : ViewModel() {
 
     var userName: String = ""
@@ -24,34 +24,28 @@ class SignUpViewModel(
     var password: String = ""
 
 
-    val signUpResult = MutableLiveData<SignUpResultModel>()
+    val signUpResult = MutableLiveData<Event<SignUpResultModel>>()
     val insertStatusLiveData: MutableLiveData<Long> = MutableLiveData()
+    val isUserNameTakenLiveData = SingleLiveEvent<Boolean>()
+
 
     fun isUserNameValid(): Pair<Boolean, String>{
-        initUser()
-        val (isUserNameValid, message) = validator.isUserNameValid(user.userName)
+        val (isUserNameValid, message) = validator.isUserNameValid(userName)
         return Pair(isUserNameValid, message)
     }
 
     fun isEmailValid(): Pair<Boolean, String>{
-        val (isEmailValid, message) = validator.isEmailValid(user.email)
+        val (isEmailValid, message) = validator.isEmailValid(email)
         return Pair(isEmailValid, message)
     }
 
     fun isPasswordValid(): Pair<Boolean, String>{
-        val (isPasswordValid, message) = validator.isPasswordValid(user.password)
+        val (isPasswordValid, message) = validator.isPasswordValid(password)
         return Pair(isPasswordValid, message)
     }
 
-    private fun initUser(){
-        user = User(userName= userName,email=  email, password= password)
-        signUpRepo = SignUpRepository(user)
-    }
-
-
     fun signUp(){
-        print(user.userName)
-        signUpRepo.signUp()
+        signUpRepo.signUp(userName, email, password)
         signUpRepo.signUpResult.observeForever(Observer {
             signUpResult.value = it
         })
@@ -64,10 +58,17 @@ class SignUpViewModel(
 
     suspend fun addUserToRoomDatabase(user: User) {
         withContext(Dispatchers.Main) {
-            localUserRepository.addUserToRoom(user)
-            localUserRepository.insertStatusLiveData.observeForever {
+            localAuthRepository.addUserToRoom(user)
+            localAuthRepository.insertStatusLiveData.observeForever {
                 insertStatusLiveData.postValue(it)
             }
+        }
+    }
+
+    suspend fun isUserNameAlreadyTaken(userName: String) {
+        signUpRepo.isUserNameAlreadyTaken(userName)
+        signUpRepo.isUserNameTakenLiveData.observeForever{
+            isUserNameTakenLiveData.value = it
         }
     }
 }

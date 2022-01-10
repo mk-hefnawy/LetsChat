@@ -3,31 +3,35 @@ package com.example.letschat.auth.server.remote
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.example.letschat.auth.models.SignUpResultModel
+import com.example.letschat.other.Event
+import com.example.letschat.other.SingleLiveEvent
 import com.example.letschat.user.User
-import com.example.letschat.server.FireBaseService
+import com.example.letschat.server.remote.FireBaseService
 
 
-open class SignUpRepository(val user: User) {
+open class SignUpRepository(
+    private val fireBaseService: FireBaseService
+) {
 
-    lateinit var fireBaseService: FireBaseService
-    val signUpResult: MutableLiveData<SignUpResultModel> = MutableLiveData()
+    val signUpResult: MutableLiveData<Event<SignUpResultModel>> = MutableLiveData()
+    val isUserNameTakenLiveData = SingleLiveEvent<Boolean>()
 
-    protected fun checkIfEmailOrUserNameAreAlreadyInDB(){
-
-    }
-
-    fun signUp(){
-        fireBaseService = FireBaseService()
-        print(user.userName)
-        fireBaseService.signUp(userName = user.userName, email = user.email, password = user.password)
-        fireBaseService.signUpResult.observeForever(Observer {
+    fun signUp(userName: String, email: String, password: String) {
+        fireBaseService.signUp(userName = userName, email = email, password = password)
+        fireBaseService.signUpResult.observeForever{
             signUpResult.value = it
-        })
+        }
     }
 
-    fun isUserAlreadyLoggedIn(): Pair<Boolean, String>{
-        fireBaseService = FireBaseService()
+    fun isUserAlreadyLoggedIn(): Pair<Boolean, String> {
         val (isUserLoggedIn, uId) = fireBaseService.isUserAlreadyLoggedIn()
         return Pair(isUserLoggedIn, uId)
+    }
+
+    fun isUserNameAlreadyTaken(userName: String) {
+        fireBaseService.isUserNameAlreadyTaken(userName)
+        fireBaseService.isUserNameTakenLiveData.observeForever {
+            isUserNameTakenLiveData.value = it
+        }
     }
 }

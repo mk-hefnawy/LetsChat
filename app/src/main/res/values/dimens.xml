@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="addDeclineFriendRequestSize">@dimen/_15sdp</dimen>
+    <dimen name="roomUserName">@dimen/_20sdp</dimen>
+
+</resources>

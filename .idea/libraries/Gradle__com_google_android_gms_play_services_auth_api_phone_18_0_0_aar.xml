@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.google.android.gms:play-services-auth-api-phone:18.0.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a5d5ef2898d5d6d94caaa5f24baa7d39/play-services-auth-api-phone-18.0.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a5d5ef2898d5d6d94caaa5f24baa7d39/play-services-auth-api-phone-18.0.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a5d5ef2898d5d6d94caaa5f24baa7d39/play-services-auth-api-phone-18.0.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/36bdaef45773339a07423ce61edf08cd/play-services-auth-api-phone-18.0.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2b1895633443103d894ed0d224fd2fd5/play-services-auth-api-phone-18.0.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2b1895633443103d894ed0d224fd2fd5/play-services-auth-api-phone-18.0.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2b1895633443103d894ed0d224fd2fd5/play-services-auth-api-phone-18.0.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.android.gms/play-services-auth-api-phone/18.0.0/e50322b5fef28962e883380be05fcf2298222b00/play-services-auth-api-phone-18.0.0-javadoc.jar!/" />

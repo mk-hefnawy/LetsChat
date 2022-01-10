@@ -4,15 +4,16 @@ import android.content.Context
 import com.example.letschat.R
 import com.example.letschat.user.User
 import com.example.letschat.auth.server.remote.LoginRepository
+import com.example.letschat.server.remote.FireBaseService
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 
-class FederatedLoginManager(user: User): LoginRepository() {
+class FederatedLoginManager(user: User, fireBaseService: FireBaseService): LoginRepository(fireBaseService) {
 
 
     fun loginWithGoogle(context: Context){
-        super.fireBaseService.loginWithGoogle(context)
+        // super.fireBaseService.loginWithGoogle(context)
     }
 
     fun getGoogleClientForLogin(context: Context){

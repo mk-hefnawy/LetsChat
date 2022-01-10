@@ -12,6 +12,14 @@
     <string name="enter_friend_user_name">Enter friend user name</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="letschat">LetsChat</string>
+    <string name="user_current_status">Online</string>
+    <string name="user_number_of_friends">10</string>
+    <string name="add">add</string>
+    <string name="cancel_friend_request">Cancel Friend Request</string>
+    <string name="message">Message:</string>
 
 
 </resources>

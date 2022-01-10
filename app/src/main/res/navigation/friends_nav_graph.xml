@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/friends_nav_graph"
+    app:startDestination="@id/friendsFragment2">
+
+    <fragment
+        android:id="@+id/friendsFragment2"
+        android:name="com.example.letschat.home.ui.FriendsFragment"
+        android:label="FriendsFragment" >
+        <action
+            android:id="@+id/action_friendsFragment2_to_chatRoomFragment2"
+            app:destination="@id/chatRoomFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatRoomFragment2"
+        android:name="com.example.letschat.chatroom.ui.ChatRoomFragment"
+        android:label="ChatRoomFragment" />
+</navigation>
