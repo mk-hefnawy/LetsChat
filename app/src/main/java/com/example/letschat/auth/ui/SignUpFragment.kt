@@ -59,21 +59,24 @@ class SignUpFragment : Fragment(), View.OnClickListener {
 
     private fun observeSignUpResult() {
         signUpViewModel.signUpResult.observe(viewLifecycleOwner, {
-            it.getContentIfNotHandled()?.let {result ->
+            it.getContentIfNotHandled()?.let { result ->
                 handleSignUpResult(result)
             }
         })
     }
 
     private fun observeIsUserNameAlreadyTaken() {
-        signUpViewModel.isUserNameTakenLiveData.observe(viewLifecycleOwner, {
-            if (it) {
-                showUserNameAlreadyTakenError()
+        signUpViewModel.isUserNameTakenLiveData.observe(viewLifecycleOwner, { res ->
+            res.getContentIfNotHandled()?.let {
+                if (it) {
+                    showUserNameAlreadyTakenError()
 
-                Log.d("Here", "User Name is already taken")
-            } else {
-                continueValidation()
+                    Log.d("Here", "User Name is already taken")
+                } else {
+                    continueValidation()
+                }
             }
+
         })
     }
 
@@ -117,10 +120,8 @@ class SignUpFragment : Fragment(), View.OnClickListener {
 
     private fun handleSignUpResult(signUpResult: SignUpResultModel?) {
         if (signUpResult?.isSignUpSuccessful == true) { // can't be with the (== true) because its a Boolean? not Boolean
-            // Add User To Room
-            //addUserToRoomDatabase(signUpResult.user!!)
-            Toast.makeText(requireContext(), "Signed up successfully", Toast.LENGTH_SHORT).show()
-            updateUiForLoggedInUser()
+            addUserToRoomDatabase(signUpResult.user!!)
+
         } else {
             Toast.makeText(requireContext(), "Sign up failed", Toast.LENGTH_SHORT).show()
 
@@ -130,11 +131,18 @@ class SignUpFragment : Fragment(), View.OnClickListener {
     private fun addUserToRoomDatabase(user: User) {
         lifecycleScope.launch(Dispatchers.Main) {
             signUpViewModel.addUserToRoomDatabase(user)
-            signUpViewModel.insertStatusLiveData.observe(viewLifecycleOwner, {
-                if (it != -1L) {
-                    Log.d("Here", "Room Success")
-                    Log.d("Here", "User in Room with id: $it")
-                    updateUiForLoggedInUser()
+            signUpViewModel.insertStatusLiveData.observe(viewLifecycleOwner, { result ->
+                result.getContentIfNotHandled()?.let {
+                    if (it != -1L) {
+                        Log.d("Here", "Room Success")
+                        Log.d("Here", "User in Room with id: $it")
+                        Toast.makeText(
+                            requireContext(),
+                            "Signed up successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        updateUiForLoggedInUser()
+                    }
                 }
             })
         }

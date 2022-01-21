@@ -6,12 +6,16 @@
     <data>
 
     </data>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".base.BaseFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fragment_base_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".base.BaseFragment">
+       >
 
 
         <TextView
@@ -60,4 +64,5 @@
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
 </layout>

@@ -7,18 +7,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.letschat.R
+import com.example.letschat.chatroom.chat.ChatRoomViewModel
 import com.example.letschat.databinding.FragmentBaseBinding
 import com.example.letschat.di.AppContainer
+import com.example.letschat.home.view_models.ChatsViewModel
+import com.example.letschat.home.view_models.FriendsViewModel
 import com.google.firebase.auth.FirebaseUser
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class BaseFragment : Fragment(), View.OnClickListener {
     private lateinit var fragmentBaseBinding: FragmentBaseBinding
     private lateinit var navController: NavController
     private lateinit var appContainer: AppContainer
+
+    val chatRoomViewModel: ChatRoomViewModel by viewModels()
 
     companion object {
         const val TAG = "BaseFragmentHere"
@@ -28,17 +37,23 @@ class BaseFragment : Fragment(), View.OnClickListener {
         savedInstanceState: Bundle?
     ): View {
 
-        return inflater.inflate(R.layout.fragment_base, container, false)
+        fragmentBaseBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_base, container, false)
+        return fragmentBaseBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Initializations
-        fragmentBaseBinding = DataBindingUtil.setContentView(requireActivity(), R.layout.fragment_base)
+
         appContainer = AppContainer(requireContext())
         navController = findNavController()
         setOnClickListeners()
 
+        Log.d("Here", "Base Fragment")
+        /*val homeViewModel = appContainer.homeViewModel
+        homeViewModel.deleteAllUsersFromCache()
+
+        chatRoomViewModel.deleteAllChatRooms()*/
     }
 
     private fun setOnClickListeners() {
@@ -74,11 +89,12 @@ class BaseFragment : Fragment(), View.OnClickListener {
 
     private fun goToHomeFragment() {
         navController.navigate(BaseFragmentDirections.actionBaseToHome())
+        Log.d("Here", "From Base To Home")
     }
 
     override fun onStart() {
         super.onStart()
-        // so if the user is already signed in, they have to be directed to HomeActivity
+       // so if the user is already signed in, they have to be directed to HomeActivity
         val currentUser = appContainer.auth.currentUser
         handleUiBasedOnSignInStatus(currentUser)
 

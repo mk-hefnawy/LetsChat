@@ -2,10 +2,10 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/friends_nav_graph"
-    app:startDestination="@id/friendsFragment2">
+    app:startDestination="@id/friendsFragment">
 
     <fragment
-        android:id="@+id/friendsFragment2"
+        android:id="@+id/friendsFragment"
         android:name="com.example.letschat.home.ui.FriendsFragment"
         android:label="FriendsFragment" >
         <action
@@ -16,4 +16,6 @@
         android:id="@+id/chatRoomFragment2"
         android:name="com.example.letschat.chatroom.ui.ChatRoomFragment"
         android:label="ChatRoomFragment" />
+
+
 </navigation>

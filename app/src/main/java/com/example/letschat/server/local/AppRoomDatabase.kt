@@ -5,12 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.letschat.auth.server.local.user.AuthDao
+import com.example.letschat.chatroom.chat.ChatRoom
+import com.example.letschat.chatroom.data.local.ChatRoomDao
+import com.example.letschat.home.server.local.ChatsDao
 import com.example.letschat.user.User
 
-@Database(entities = [User::class], version = 1)
-abstract class AppRoomDatabase: RoomDatabase() {
+@Database(entities = [User::class, ChatRoom::class], version = 3)
+abstract class AppRoomDatabase : RoomDatabase() {
 
     abstract fun authDao(): AuthDao
+    abstract fun chatRoomDao(): ChatRoomDao
+    abstract fun chatsDao(): ChatsDao
 
     companion object {
         @Volatile
@@ -23,9 +28,11 @@ abstract class AppRoomDatabase: RoomDatabase() {
             }
         }
 
-    private fun buildDatabase(context: Context) = Room.databaseBuilder(
-        context.applicationContext,
-        AppRoomDatabase::class.java,
-        "AppRoomDatabase"
-    ).build()
-}}
+        private fun buildDatabase(context: Context) = Room.databaseBuilder(
+            context.applicationContext,
+            AppRoomDatabase::class.java,
+            "AppRoomDatabase"
+        ).fallbackToDestructiveMigration() // will clear the db when version updated
+            .build()
+    }
+}

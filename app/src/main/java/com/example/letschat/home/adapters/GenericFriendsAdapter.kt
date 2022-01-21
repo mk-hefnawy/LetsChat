@@ -68,4 +68,11 @@ class GenericFriendsAdapter:
     fun addFriendRequest(user: User) {
         users.add(user)
     }
+
+    fun removeFriendRequest(uid: String){
+        users.filter { it.uid == uid }.let {
+            users.removeAll(it)
+        }
+        this.notifyDataSetChanged()
+    }
 }

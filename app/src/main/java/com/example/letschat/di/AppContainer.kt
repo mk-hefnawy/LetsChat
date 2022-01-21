@@ -9,6 +9,7 @@ import com.example.letschat.auth.server.remote.LoginRepository
 import com.example.letschat.auth.server.remote.SignUpRepository
 import com.example.letschat.auth.view_models.LoginViewModel
 import com.example.letschat.auth.view_models.SignUpViewModel
+import com.example.letschat.home.server.local.LocalHomeRepository
 import com.example.letschat.home.server.remote.HomeRepository
 import com.example.letschat.home.server.remote.AddFriendRepository
 import com.example.letschat.home.server.remote.FriendRequestsRepository
@@ -34,6 +35,7 @@ class AppContainer(context: Context) {
     private var signUpRepo = SignUpRepository(fireBaseService)
     private val addFriendRepository = AddFriendRepository(fireBaseService)
     private var localUserRepository = LocalAuthRepository(roomService)
+    private val localHomeRepository = LocalHomeRepository(roomService, auth)
     private val friendRequestsRepository = FriendRequestsRepository(fireBaseService)
 
     private var homeRepo = HomeRepository(fireBaseService)
@@ -44,7 +46,7 @@ class AppContainer(context: Context) {
 
 
     var loginViewModel: LoginViewModel = LoginViewModelFactory(validator, loginRepo, federatedLoginManager).create()
-    var homeViewModel: HomeViewModel = HomeViewModelFactory(validator, homeRepo).create()
+    var homeViewModel: HomeViewModel = HomeViewModelFactory(validator, homeRepo, localHomeRepository).create()
     var signUpViewModel: SignUpViewModel = SignUpViewModelFactory(validator, signUpRepo, localUserRepository).create()
     val addFriendViewModel = AddFriendViewModel(validator, addFriendRepository)
     val friendRequestsViewModel = FriendRequestsViewModel(friendRequestsRepository)

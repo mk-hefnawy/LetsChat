@@ -8,7 +8,7 @@ import com.example.letschat.user.User
 class FriendRequestsRepository(private val fireBaseService: FireBaseService) {
 
     val allReceivedFriendRequestsLiveData = MutableLiveData<List<User>>()
-    val friendRequestReactionLiveData = MutableLiveData<Event<Pair<Boolean, String>>>()
+    val friendRequestReactionLiveData = MutableLiveData<Event<FireBaseService.obj>>()
 
     fun getAllFriendRequests(){
         fireBaseService.getAllFriendRequests()

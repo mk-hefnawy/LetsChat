@@ -22,6 +22,7 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
     private lateinit var appContainer: AppContainer
     private lateinit var binding: FragmentFriendRequestsBinding
     private lateinit var viewModel: FriendRequestsViewModel
+
     @Inject
     lateinit var adapter: GenericFriendsAdapter
 
@@ -55,20 +56,34 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
     private fun observeFriendRequests() {
         viewModel.getAllFriendRequests()
         viewModel.allReceivedFriendRequestsLiveData.observe(viewLifecycleOwner, { users ->
-            showFriendRequests(users)
+            if (users.isNotEmpty()) {
+                showFriendRequests(users)
+            }else{
+                showNoFriendRequests()
+            }
         })
+    }
+
+    private fun showNoFriendRequests() {
+        binding.noFriendRequestsTextView.visibility = View.VISIBLE
+        binding.friendRequestsRecyclerView.visibility = View.GONE
     }
 
     private fun observeFriendRequestReaction() {
         viewModel.friendRequestReactionLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let {
-                if (it.first) {
-                    Toast.makeText(requireContext(), it.second, Toast.LENGTH_SHORT).show()
+                if (it.result) {
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                    removeFriendRequestFromRecyclerView(it.uid)
                 } else {
-                    Toast.makeText(requireContext(), it.second, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
                 }
             }
         })
+    }
+
+    private fun removeFriendRequestFromRecyclerView(uid: String) {
+        adapter.removeFriendRequest(uid)
     }
 
     private fun showFriendRequests(users: List<User>?) {

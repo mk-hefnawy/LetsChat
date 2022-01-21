@@ -77,6 +77,9 @@
         <action
             android:id="@+id/action_homeToAddFriend"
             app:destination="@id/addFriendDialog" />
+        <action
+            android:id="@+id/action_homeFragment_to_chatRoomFragment"
+            app:destination="@id/chatRoomFragment" />
 
     </fragment>
 
@@ -104,6 +107,20 @@
             android:name="searchedUser"
             app:argType="com.example.letschat.user.User"
             />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.letschat.home.ui.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/chatRoomFragment"
+        android:name="com.example.letschat.chatroom.ui.ChatRoomFragment"
+        android:label="ChatRoomFragment">
+
+        <argument android:name="chattingUser"
+            app:argType="com.example.letschat.user.User"/>
     </fragment>
 
 

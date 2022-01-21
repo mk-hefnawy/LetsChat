@@ -14,7 +14,7 @@ open class SignUpRepository(
 ) {
 
     val signUpResult: MutableLiveData<Event<SignUpResultModel>> = MutableLiveData()
-    val isUserNameTakenLiveData = SingleLiveEvent<Boolean>()
+    val isUserNameTakenLiveData = SingleLiveEvent<Event<Boolean>>()
 
     fun signUp(userName: String, email: String, password: String) {
         fireBaseService.signUp(userName = userName, email = email, password = password)

@@ -20,6 +20,10 @@
     <string name="add">add</string>
     <string name="cancel_friend_request">Cancel Friend Request</string>
     <string name="message">Message:</string>
+    <string name="no_messages">No Messages</string>
+    <string name="no_friend_requests">No Friend Requests</string>
+    <string name="aa">Aa:</string>
+    <string name="settings">Settings</string>
 
 
 </resources>

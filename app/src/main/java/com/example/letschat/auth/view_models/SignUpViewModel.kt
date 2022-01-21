@@ -25,8 +25,8 @@ class SignUpViewModel(
 
 
     val signUpResult = MutableLiveData<Event<SignUpResultModel>>()
-    val insertStatusLiveData: MutableLiveData<Long> = MutableLiveData()
-    val isUserNameTakenLiveData = SingleLiveEvent<Boolean>()
+    val insertStatusLiveData: MutableLiveData<Event<Long>> = MutableLiveData()
+    val isUserNameTakenLiveData = SingleLiveEvent<Event<Boolean>>()
 
 
     fun isUserNameValid(): Pair<Boolean, String>{

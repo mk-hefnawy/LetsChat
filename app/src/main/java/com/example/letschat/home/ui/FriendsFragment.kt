@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.letschat.R
 import com.example.letschat.chatroom.ui.ChatRoomFragment
@@ -57,8 +58,11 @@ class FriendsFragment : Fragment(), IGenericFriends {
     }
 
     private fun observeFriendsLiveData() {
-        viewModel.friendsLiveData.observe(requireActivity(), {
-            showFriends(it)
+        viewModel.friendsLiveData.observe(requireActivity(), { result->
+            result.getContentIfNotHandled()?.let {
+                showFriends(it)
+            }
+
         })
     }
 
@@ -80,18 +84,18 @@ class FriendsFragment : Fragment(), IGenericFriends {
 
     override fun onFriendClicked(user: User) {
 
-        navController.navigate(FriendsFragmentDirections.actionFriendsFragment2ToChatRoomFragment2())
-        /*
-        val chatRoomFragment = ChatRoomFragment()
+        activity?.findNavController(R.id.fragmentContainerView)?.navigate(HomeFragmentDirections.actionHomeFragmentToChatRoomFragment(user))
+
+      /*  val chatRoomFragment = ChatRoomFragment()
         val bundle = Bundle()
         bundle.putString("chattingUser", Gson().toJson(user))
 
         chatRoomFragment.arguments = bundle
         val ft = activity?.supportFragmentManager?.beginTransaction()
         ft?.replace(R.id.home_fragment_root, chatRoomFragment)
+
         ft?.addToBackStack(null)
         activity?.findViewById<FloatingActionButton>(R.id.add_friend_button)?.visibility = View.GONE
-        activity?.findViewById<FloatingActionButton>(R.id.logout_button)?.visibility = View.GONE
         ft?.commit()*/
     }
 }
