@@ -51,6 +51,7 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
         binding.lifecycleOwner = this
 
         adapter.setGenericFriendsInterface(this)
+        binding.friendRequestsProgressBar.visibility = View.VISIBLE
     }
 
     private fun observeFriendRequests() {
@@ -67,6 +68,7 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
     private fun showNoFriendRequests() {
         binding.noFriendRequestsTextView.visibility = View.VISIBLE
         binding.friendRequestsRecyclerView.visibility = View.GONE
+        binding.friendRequestsProgressBar.visibility = View.GONE
     }
 
     private fun observeFriendRequestReaction() {
@@ -88,9 +90,10 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
 
     private fun showFriendRequests(users: List<User>?) {
         users?.let {
-            adapter.addFriendRequests(it as ArrayList<User>)
+            adapter.setUsers(it as ArrayList<User>)
             binding.friendRequestsRecyclerView.adapter = adapter
             binding.friendRequestsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+            binding.friendRequestsProgressBar.visibility = View.GONE
         }
     }
 

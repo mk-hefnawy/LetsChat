@@ -38,19 +38,15 @@ class FriendsFragment : Fragment(), IGenericFriends {
         savedInstanceState: Bundle?
     ): View {
             binding = DataBindingUtil.inflate(inflater, R.layout.fragment_friends, container, false)
+            observeFriendsLiveData()
         return binding.root
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Toast.makeText(requireContext(), "Friends Destroyed", Toast.LENGTH_SHORT).show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUp()
         getFriends()
-        observeFriendsLiveData()
+
     }
 
     private fun getFriends() {
@@ -59,23 +55,36 @@ class FriendsFragment : Fragment(), IGenericFriends {
 
     private fun observeFriendsLiveData() {
         viewModel.friendsLiveData.observe(requireActivity(), { result->
-            result.getContentIfNotHandled()?.let {
-                showFriends(it)
+            result.getContentIfNotHandled()?.let { friends ->
+                if (friends.isEmpty()){
+                    binding.friendsProgressBar.visibility = View.GONE
+                    binding.noFriends.visibility = View.VISIBLE
+                    binding.friendRecyclerView.visibility = View.GONE
+
+                }else{
+                    showFriends(friends)
+                }
+
             }
 
         })
     }
 
     private fun setUp() {
+
         binding.friendRecyclerView.adapter = adapter
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter.setGenericFriendsInterface(this)
+        binding.friendsProgressBar.visibility = View.VISIBLE
     }
 
     private fun showFriends(users: List<User>?) {
         users?.let {
-            adapter.addFriendRequests(it as ArrayList<User>)
+            binding.noFriends.visibility = View.GONE
+            adapter.setUsers(it as ArrayList<User>) // if adding, friends will duplicate each time the user views that fragment, setting is the key.
             adapter.notifyDataSetChanged()
+            binding.friendsProgressBar.visibility = View.GONE
+            binding.friendRecyclerView.visibility = View.VISIBLE
         }
     }
 

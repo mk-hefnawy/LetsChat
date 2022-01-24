@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="viewModel"
             type="com.example.letschat.home.view_models.AddFriendViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/add_friend_fragment_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
@@ -19,8 +21,9 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
             android:layout_width="match_parent"
-
             android:layout_height="wrap_content"
+
+
             app:layout_constraintBottom_toTopOf="@+id/result_card_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -30,19 +33,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <ImageView
-                    android:id="@+id/image_add_friend"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_person_add_150"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/input_layout_friend_user_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_2sdp"
 
                     android:hint="@string/enter_friend_user_name"
 
@@ -58,10 +53,9 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
 
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/image_add_friend">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/edit_text_friend_user_name"
@@ -118,40 +112,51 @@
             android:layout_height="wrap_content"
 
 
+            android:layout_margin="@dimen/_10sdp"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/_15sdp"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardView"
-
-            app:cardCornerRadius="@dimen/_15sdp"
-            android:layout_margin="@dimen/_10sdp"
-            android:visibility="gone">
+            app:layout_constraintTop_toBottomOf="@id/cardView">
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <ImageView
+                <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/image_of_potential_user"
-                    android:src="@drawable/outline_account_circle_black_48"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="@dimen/_40sdp"
                     android:layout_weight="1"
-                    />
+                    android:src="@drawable/outline_account_circle_black_48" />
 
                 <TextView
                     android:id="@+id/name_of_potential_user"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-
-                    android:text="Samir Abd Rabbu"
-                    android:textSize="@dimen/_14sdp"
-                    />
+                    android:textColor="@color/textColor"
+                    android:textSize="@dimen/_14sdp" />
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/user_name_not_found"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="User name not found"
+
+            android:textSize="@dimen/_15sdp"
+
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardView" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

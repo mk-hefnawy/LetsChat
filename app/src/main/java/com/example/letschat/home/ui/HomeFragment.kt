@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
@@ -54,9 +55,8 @@ class HomeFragment : Fragment(), View.OnClickListener{
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        homeFragmentBinding =
-            DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
-        return homeFragmentBinding.root
+
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,6 +72,9 @@ class HomeFragment : Fragment(), View.OnClickListener{
     }
 
     private fun setUp() {
+        homeFragmentBinding = DataBindingUtil.bind(view?.findViewById(R.id.home_fragment_root)!!)!!
+
+
         appContainer = AppContainer(requireContext())
         homeViewModel = appContainer.homeViewModel
         homeFragmentBinding.viewModel = homeViewModel
@@ -93,9 +96,9 @@ class HomeFragment : Fragment(), View.OnClickListener{
             homeFragmentBinding.viewPager
         ) { tab, pos ->
             when (pos) {
-                0 -> tab.text = "Chats"
-                1 -> tab.text = "Friends"
-                2 -> tab.text = "Friend Requests"
+                0 -> tab.text = activity?.getString(R.string.chats) // to support multi languages
+                1 -> tab.text = activity?.getString(R.string.friends)
+                2 -> tab.text = activity?.getString(R.string.friend_requests)
             }
         }.attach()
 

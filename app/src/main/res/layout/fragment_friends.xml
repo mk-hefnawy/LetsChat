@@ -13,7 +13,8 @@
         android:id="@+id/friends_fragment_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".home.ui.FriendsFragment">
+        tools:context=".home.ui.FriendsFragment"
+        android:background="@color/backGroundColor">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/friend_recycler_view"
@@ -23,6 +24,31 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/no_friends"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:text="@string/no_friends"
+            android:textSize="@dimen/_20sdp"
+            android:gravity="center"
+            android:visibility="gone"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ProgressBar
+            android:id="@+id/friends_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

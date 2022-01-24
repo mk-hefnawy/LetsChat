@@ -12,10 +12,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.*
@@ -24,10 +26,15 @@ import com.example.letschat.R
 import com.example.letschat.databinding.ActivityBaseBinding
 import com.example.letschat.home.ui.HomeFragment
 import com.example.letschat.home.view_models.HomeViewModel
+import com.example.letschat.server.local.DataStorePreferences.DataStoreImp
+import com.example.letschat.server.local.DataStorePreferences.DataStorePreferencesConstants
 import com.example.letschat.user.User
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class BaseActivity : AppCompatActivity(), View.OnClickListener {
@@ -40,7 +47,11 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
 
     val baseViewModel: BaseViewModel by viewModels()
 
-    val notSignedInYetDestinations = setOf(R.id.baseFragment, R.id.loginFragment, R.id.signUpFragment)
+    @Inject
+    lateinit var dataStoreImp: DataStoreImp
+
+    private val notSignedInYetDestinations =
+        setOf(R.id.baseFragment, R.id.loginFragment, R.id.signUpFragment)
 
     private companion object {
         private const val PICK_IMAGE = 500
@@ -50,16 +61,14 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
 
         binding = ActivityBaseBinding.inflate(layoutInflater)
-        val view: View = binding.getRoot()
+        val view: View = binding.root
         setContentView(view)
 
         init()
         setOnClickListeners()
         setOnDestinationChangedListener()
-
         observeUploadImage()
     }
-
 
 
     private fun init() {
@@ -76,11 +85,45 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
         navView.setupWithNavController(navController)
 
         navHeader = binding.navView.getHeaderView(0)
+        handleTheme()
+    }
+
+    private fun handleTheme() {
+        lifecycleScope.launch {
+            dataStoreImp.getPreference(
+                DataStorePreferencesConstants.THEME_MODE_NIGHT,false
+            )
+                .collect { theTheme ->
+                    if (theTheme) {
+                        showDarkMode()
+                    } else {
+                        showLightMode()
+                    }
+                }
+        }
+    }
+
+    private fun showDarkMode() {
+        AppCompatDelegate
+            .setDefaultNightMode(
+                AppCompatDelegate
+                    .MODE_NIGHT_YES)
+
+        binding.theToolBar.toolBarDayLight.setImageResource(R.drawable.outline_light_mode_24)
+    }
+
+    private fun showLightMode() {
+        AppCompatDelegate
+            .setDefaultNightMode(
+                AppCompatDelegate
+                    .MODE_NIGHT_NO)
     }
 
     private fun setOnClickListeners() {
         binding.theToolBar.toolBarIcon.setOnClickListener(this)
         binding.theToolBar.toolBarBack.setOnClickListener(this)
+        binding.theToolBar.toolBarDayLight.setOnClickListener(this)
+        navHeader.findViewById<ImageView>(R.id.nav_header_user_image).setOnClickListener(this)
     }
 
     private fun setOnDestinationChangedListener() {
@@ -94,8 +137,10 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
                     toolBar.visibility = View.VISIBLE
                     toolBar.findViewById<ImageView>(R.id.tool_bar_back).visibility = View.GONE
                     toolBar.findViewById<ImageView>(R.id.tool_bar_icon).visibility = View.VISIBLE
-                    toolBar.findViewById<TextView>(R.id.tool_bar_title).text = getString(R.string.letschat)
-                    toolBar.findViewById<ImageView>(R.id.tool_bar_create_new_chat).visibility = View.VISIBLE
+                    toolBar.findViewById<TextView>(R.id.tool_bar_title).text =
+                        getString(R.string.letschat)
+                    toolBar.findViewById<ImageView>(R.id.tool_bar_create_new_chat).visibility =
+                        View.VISIBLE
 
                     // el mo4kla kda en kol ma el home fragment tegy lel forground, hro7 ageb el user info
                     getUserForDrawer()
@@ -106,15 +151,18 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
                     toolBar.visibility = View.VISIBLE
                     toolBar.findViewById<ImageView>(R.id.tool_bar_back).visibility = View.VISIBLE
                     toolBar.findViewById<ImageView>(R.id.tool_bar_icon).visibility = View.GONE
-                    toolBar.findViewById<ImageView>(R.id.tool_bar_create_new_chat).visibility = View.GONE
+                    toolBar.findViewById<ImageView>(R.id.tool_bar_create_new_chat).visibility =
+                        View.GONE
 
-                    toolBar.findViewById<TextView>(R.id.tool_bar_title).text = getString(R.string.settings)
+                    toolBar.findViewById<TextView>(R.id.tool_bar_title).text =
+                        getString(R.string.settings)
                 }
 
                 else -> {
                     toolBar.visibility = View.VISIBLE
                     toolBar.findViewById<ImageView>(R.id.tool_bar_back).visibility = View.VISIBLE
-                    toolBar.findViewById<ImageView>(R.id.tool_bar_create_new_chat).visibility = View.VISIBLE
+                    toolBar.findViewById<ImageView>(R.id.tool_bar_create_new_chat).visibility =
+                        View.VISIBLE
                 }
             }
         }
@@ -124,8 +172,17 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
         when (view) {
             binding.theToolBar.toolBarIcon -> openDrawer()
             binding.theToolBar.toolBarBack -> onToolBarBackPressed()
+            binding.theToolBar.toolBarDayLight -> onToolBarDayLightClicked()
             navHeader.findViewById<CircleImageView>(R.id.nav_header_user_image) -> {
                 changeUserProfilePicture()
+            }
+        }
+    }
+
+    private fun onToolBarDayLightClicked() {
+        lifecycleScope.launch {
+            dataStoreImp.getPreference(DataStorePreferencesConstants.THEME_MODE_NIGHT, false).collect {
+                dataStoreImp.putPreference(DataStorePreferencesConstants.THEME_MODE_NIGHT, it.not())
             }
         }
     }
@@ -188,7 +245,8 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
                         "Picture Uploaded Successfully",
                         Toast.LENGTH_SHORT
                     ).show()
-                    navHeader.findViewById<ImageView>(R.id.nav_header_user_image).setImageBitmap(it.second)
+                    navHeader.findViewById<ImageView>(R.id.nav_header_user_image)
+                        .setImageBitmap(it.second)
                     binding.theToolBar.toolBarIcon.setImageBitmap(it.second)
                 } else {
                     Toast.makeText(

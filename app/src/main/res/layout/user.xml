@@ -3,7 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+android:background="@color/backGroundColor"
+  >
 
     <androidx.cardview.widget.CardView
         android:id="@+id/user_card_view"
@@ -12,25 +14,27 @@
 
 
         android:layout_margin="@dimen/_10sdp"
-        android:padding="@dimen/_200sdp"
         android:visibility="visible"
 
         app:cardCornerRadius="@dimen/_15sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/backGroundColor">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="@dimen/_10sdp"
+            android:background="@color/backGroundColor">
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/image_of_user"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
                 android:layout_weight="1"
                 android:src="@drawable/outline_account_circle_black_48" />
 
@@ -41,7 +45,8 @@
                 android:layout_weight="3"
 
                 android:text="Samir Abd Rabbu"
-                android:textSize="@dimen/_14sdp" />
+                android:textSize="@dimen/_14sdp"
+                android:textColor="@color/textColor"/>
 
 
                 <ImageView

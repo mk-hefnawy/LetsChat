@@ -13,68 +13,7 @@
         android:id="@+id/chat_room_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
-
-       <!-- <RelativeLayout
-            android:id="@+id/room_top"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primaryColor"
-
-            android:gravity="center_horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-
-            <ImageView
-                android:id="@+id/chat_room_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-
-                android:layout_centerInParent="true"
-
-                android:padding="@dimen/_5sdp"
-                android:src="@drawable/outline_arrow_back_black_36"
-                android:tint="@color/white" />
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/chat_room_user_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-
-                android:layout_toEndOf="@id/chat_room_back"
-
-                android:src="@mipmap/avatar1" />
-
-            <TextView
-                android:id="@+id/chat_room_user_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_toEndOf="@id/chat_room_user_image"
-
-                android:padding="@dimen/_5sdp"
-                android:text="Hazem"
-
-                android:textColor="@color/white"
-                android:textSize="@dimen/roomUserName" />
-
-            <ImageView
-                android:id="@+id/chat_room_three_dots_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:layout_alignParentEnd="true"
-                android:layout_centerInParent="true"
-
-                android:padding="@dimen/_5sdp"
-                android:src="@drawable/outline_more_vert_black_36"
-                android:tint="@color/white" />
-
-        </RelativeLayout>-->
+        android:background="@color/backGroundColor">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -104,7 +43,17 @@
                 android:layout_height="match_parent"
                 android:visibility="gone"
                 android:layout_centerInParent="true"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:textColor="@color/textColor"/>
+
+            <ProgressBar
+                android:id="@+id/chat_room_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:visibility="visible"
+                android:progressTint="@color/textColor"/>
         </RelativeLayout>
 
         <LinearLayout
@@ -123,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="6"
 
-                app:placeholderText="Say Something"
+                app:placeholderText="Type Something"
                 app:expandedHintEnabled="false"
 
                 app:boxCornerRadiusTopStart="@dimen/_7sdp"
@@ -151,12 +100,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/delete"
-                android:text="delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/room_send"

@@ -85,14 +85,11 @@
 
     <fragment
         android:id="@+id/addFriendDialog"
-        android:name="com.example.letschat.home.ui.AddFriendDialog"
+        android:name="com.example.letschat.home.ui.SearchFragment"
         android:label="AddFriendDialog"
-        tools:layout="@layout/fragment_add_friend">
+        tools:layout="@layout/fragment_search">
 
 
-        <action
-            android:id="@+id/action_addFriendToHome"
-            app:destination="@id/homeFragment" />
         <action
             android:id="@+id/action_addFriendDialog_to_profileFragment"
             app:destination="@id/profileFragment" />

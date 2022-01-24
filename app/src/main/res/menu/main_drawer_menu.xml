@@ -3,7 +3,8 @@
 
     <item
         android:id="@+id/log_out"
-        android:title="@string/log_out" />
+        android:title="@string/log_out"
+        />
 
     <item
         android:id="@+id/settingsFragment"

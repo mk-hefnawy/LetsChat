@@ -8,12 +8,12 @@ import com.example.letschat.user.User
 class AddFriendRepository(
     private val fireBaseService: FireBaseService
 ) {
-    val potentialFriendLiveData = MutableLiveData<User>()
+    val potentialFriendLiveData = MutableLiveData<User?>()
     val isUserAddFriendRequestSuccessful = MutableLiveData<Event<Boolean>>()
 
     fun searchUser(userNameOfUser: String){
         fireBaseService.searchUser(userNameOfUser)
-        fireBaseService.potentialFriendLiveData.observeForever{
+        fireBaseService.searchedUserLiveData.observeForever{
             potentialFriendLiveData.value = it
         }
     }

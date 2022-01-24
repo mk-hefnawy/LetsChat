@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+
+    <include
+        android:id="@+id/the_message_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        layout="@layout/message_time"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
 
@@ -10,14 +22,18 @@
         android:layout_height="wrap_content"
 
         android:layout_gravity="end"
-        android:layout_margin="@dimen/_5sdp">
+        android:layout_margin="@dimen/_5sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+
+        app:layout_constraintTop_toBottomOf="@id/the_message_time">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/chat_message_card_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:backgroundTint="@color/primaryColor"
+            android:backgroundTint="#8A8FC5"
 
             app:cardCornerRadius="@dimen/_10sdp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -30,9 +46,10 @@
                 android:layout_height="wrap_content"
 
                 android:padding="@dimen/_7sdp"
-                android:textSize="@dimen/_15sdp" />
+                android:textSize="@dimen/_15sdp"
+                android:textColor="@color/white"/>
         </androidx.cardview.widget.CardView>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

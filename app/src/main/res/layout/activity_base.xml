@@ -10,7 +10,8 @@
     android:orientation="vertical"
     tools:context=".base.BaseActivity"
 
-    tools:openDrawer="start">
+    tools:openDrawer="start"
+    android:background="@color/backGroundColor">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -49,5 +50,6 @@
         android:fitsSystemWindows="true"
 
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/main_drawer_menu" />
+        app:menu="@menu/main_drawer_menu"
+        android:background="@color/backGroundColor"/>
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -9,7 +9,9 @@
     android:layout_height="wrap_content"
 
     android:layout_margin="@dimen/_5sdp"
-    android:padding="@dimen/_10sdp">
+    android:padding="@dimen/_10sdp"
+
+    android:background="@color/backGroundColor">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/nav_header_user_image"
@@ -31,11 +33,12 @@
         android:layout_height="wrap_content"
 
         android:text="Melegy"
-        android:textSize="@dimen/_25sdp"
+        android:textSize="@dimen/_22sdp"
 
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nav_header_user_image" />
+        app:layout_constraintTop_toBottomOf="@+id/nav_header_user_image"
+        android:textColor="@color/textColor"/>
 
     <TextView
         android:id="@+id/nav_header_user_email"
@@ -43,10 +46,11 @@
         android:layout_height="wrap_content"
 
         android:text="Melegy@gmail.com"
-        android:textSize="@dimen/_20sdp"
+        android:textSize="@dimen/_16sdp"
 
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nav_header_user_name" />
+        app:layout_constraintTop_toBottomOf="@+id/nav_header_user_name"
+        android:textColor="@color/textColor"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

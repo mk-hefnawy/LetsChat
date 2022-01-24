@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.letschat.R
 import com.example.letschat.auth.view_models.LoginViewModel
@@ -55,6 +56,7 @@ class LoginFragment : Fragment(), View.OnClickListener {
 
         loginFragmentBinding.viewModel = loginViewModel
         loginFragmentBinding.lifecycleOwner = viewLifecycleOwner
+
         navController = findNavController()
     }
 
@@ -107,6 +109,7 @@ class LoginFragment : Fragment(), View.OnClickListener {
     }
 
     private fun goToHomeFragment() {
+        Log.d("Here", "Going To Home From Login")
         navController.navigate(LoginFragmentDirections.actionLoginToHome())
     }
 

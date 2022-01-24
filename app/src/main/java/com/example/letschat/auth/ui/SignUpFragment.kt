@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.letschat.R
 import com.example.letschat.auth.models.SignUpResultModel
@@ -49,6 +50,7 @@ class SignUpFragment : Fragment(), View.OnClickListener {
 
     private fun setUp() {
         appContainer = AppContainer(requireContext())
+
         navController = findNavController()
 
         signUpBinding = DataBindingUtil.setContentView(requireActivity(), R.layout.fragment_sign_up)

@@ -1,8 +1,6 @@
 package com.example.letschat.user
 
-import android.graphics.Bitmap
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import java.io.Serializable
 
@@ -16,5 +14,12 @@ data class User(
 
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
-    var friendsOrNot = false
+    var friendShipStatus: FriendShipStatus = FriendShipStatus.NONE
+}
+
+enum class FriendShipStatus{
+    NONE,
+    FRIENDS,
+    YOU_SENT_A_FRIEND_REQUEST,
+    THEY_SENT_A_FRIEND_REQUEST
 }

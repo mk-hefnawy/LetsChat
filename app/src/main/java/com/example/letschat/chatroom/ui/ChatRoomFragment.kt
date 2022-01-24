@@ -31,7 +31,9 @@ import com.example.letschat.user.User
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDateTime
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 
 @AndroidEntryPoint
@@ -65,9 +67,6 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         observeChatMessageLiveData()
         getChatDocument(chattingUser)
 
-        binding.delete.setOnClickListener{
-            viewModel.deleteAllChatRooms()
-        }
     }
 
     private fun getChatDocument(chattingUser: User) {
@@ -83,7 +82,7 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
 
                 } else {
                     // there was a chat before
-                        Log.d("Here", "Getting Previous Messages")
+                    Log.d("Here", "Getting Previous Messages")
                     showPreviousMessages(it[0])
                 }
                 viewModel.chatRoomDocIdLiveData.removeObservers(viewLifecycleOwner)
@@ -100,13 +99,15 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
 
             adapter.setMessages(it as ArrayList<ChatMessage>)
             binding.messagesRecyclerView.adapter = adapter
-            val manager =  LinearLayoutManager(requireContext())
+            val manager = LinearLayoutManager(requireContext())
             manager.stackFromEnd = true
             binding.messagesRecyclerView.layoutManager = manager
+            binding.chatRoomProgressBar.visibility = View.GONE
         })
     }
 
     private fun showNoPreviousMessages() {
+        binding.chatRoomProgressBar.visibility = View.GONE
         binding.messagesRecyclerView.visibility = View.GONE
         binding.noPreviousMessages.visibility = View.VISIBLE
     }
@@ -114,6 +115,7 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
     private fun setUp() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
+        binding.chatRoomProgressBar.visibility = View.VISIBLE
     }
 
     private fun showChattingUserInfo() {
@@ -166,23 +168,24 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         getChatDocument(chattingUser)
         viewModel.chatRoomDocIdLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let {
-                if (it.isEmpty()){
+                if (it.isEmpty()) {
                     Log.d("Here", "Document Doesn't exist, init it")
                     sendFirstMessage()
-                }else{
+                } else {
                     Log.d("Here", "Document exists")
                     val docId = it[0]
                     sendChatMessage(docId)
 
-            }
+                }
 
-        }})
+            }
+        })
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun sendFirstMessage() {
         val chatMessage =
-            ChatMessage("", chattingUser.uid, viewModel.message, "text", LocalDateTime.now())
+            ChatMessage("", chattingUser.uid, viewModel.message, "text", Date())
         viewModel.sendFirstMessage(chatMessage)
         viewModel.justCreatedChatRoomDocumentIdLiveData.observe(this, { result ->
             result.getContentIfNotHandled()?.let { (docId, message) ->
@@ -191,22 +194,27 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         })
     }
 
-    private fun addNewMessageToAdapter(chatMessage: ChatMessage){
+    private fun addNewMessageToAdapter(chatMessage: ChatMessage) {
         adapter.addMessage(chatMessage)
         adapter.notifyDataSetChanged()
         binding.roomMessageEditText.setText("")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun cacheJustCreatedDocumentId(chattingUserId: String, docId: String, chatMessage: ChatMessage) {
+    private fun cacheJustCreatedDocumentId(
+        chattingUserId: String,
+        docId: String,
+        chatMessage: ChatMessage
+    ) {
         viewModel.cacheJustCreatedDocumentId(chattingUserId, docId)
         viewModel.justCachedRoomChatDocumentResult.observe(this, { cacheResult ->
             cacheResult.getContentIfNotHandled()?.let { roomDatabaseInsertResponse ->
                 if (roomDatabaseInsertResponse != -1L) {
                     // doc cached successfully
-                        // just init
-                        adapter.setMessages(arrayListOf())
-                        addNewMessageToAdapter(chatMessage)
+                    // just init
+                    adapter.setMessages(arrayListOf())
+                    addNewMessageToAdapter(chatMessage)
+                    adapter.notifyDataSetChanged()
                     binding.messagesRecyclerView.visibility = View.VISIBLE
                     binding.noPreviousMessages.visibility = View.GONE
                     Toast.makeText(
@@ -222,12 +230,8 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun sendChatMessage(docId: String) {
         val chatMessage =
-            ChatMessage("", chattingUser.uid, viewModel.message, "text", LocalDateTime.now())
+            ChatMessage("", chattingUser.uid, viewModel.message, "text", Date())
         viewModel.sendChatMessage(chatMessage, docId)
-    }
-
-    private fun onBackClicked() {
-        activity?.onBackPressed()
     }
 
     private fun observeChatMessageLiveData() {

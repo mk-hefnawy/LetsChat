@@ -52,15 +52,15 @@ class ChatsFragment : Fragment(), ChatsInterface {
     }
 
     private fun setUp() {
-
+        binding.chatsProgressBar.visibility = View.VISIBLE
     }
 
-    private fun getAllChatsFromCache(){
+    private fun getAllChatsFromCache() {
         viewModel.getAllChatsFromCache()
     }
 
-    private fun observeAllChatsFromCache(){
-        viewModel.allChatsLiveData.observe(viewLifecycleOwner, {listOfChatDocsIds ->
+    private fun observeAllChatsFromCache() {
+        viewModel.allChatsLiveData.observe(viewLifecycleOwner, { listOfChatDocsIds ->
             listOfChatDocsIds.getContentIfNotHandled()?.let {
                 getLastMessageOfEachChat(it)
             }
@@ -72,29 +72,46 @@ class ChatsFragment : Fragment(), ChatsInterface {
         viewModel.getLastMessageOfEachChat(listOfChatDocsIds)
     }
 
-    private fun observeLastMessagesForEachChat(){
-        viewModel.listOfLastMessagesForEachChatLiveData.observe(viewLifecycleOwner, {
+    private fun observeLastMessagesForEachChat() {
+        viewModel.listOfLastMessagesForEachChatLiveData.observe(viewLifecycleOwner, { result ->
+            result.getContentIfNotHandled()?.let {
                 viewModel.getTheChattingUsers(it)
             }
+        }
         )
     }
 
-    private fun observeTheListOfChattingUsersWithTheLastMessage(){
-        viewModel.listOfChattingUsersWithTheLastMessageLiveData.observe(viewLifecycleOwner, {
-                showChats(it)
+    private fun observeTheListOfChattingUsersWithTheLastMessage() {
+        viewModel.listOfChattingUsersWithTheLastMessageLiveData.observe(viewLifecycleOwner, { result ->
+            result.getContentIfNotHandled()?.let { chats ->
+                if (chats.isEmpty()){
+                    binding.chatsRecyclerView.visibility = View.GONE
+                    binding.chatsProgressBar.visibility = View.GONE
+                    binding.noChats.visibility = View.VISIBLE
+
+                }else{
+                    showChats(chats)
+                }
+
             }
+
+        }
         )
     }
 
     private fun showChats(chats: List<Pair<ChatMessage, User>>?) {
+        binding.noChats.visibility = View.GONE
         adapter.setTheChats(chats as ArrayList<Pair<ChatMessage, User>>)
         adapter.setTheChatsInterface(this)
         binding.chatsRecyclerView.adapter = adapter
         binding.chatsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.chatsProgressBar.visibility = View.GONE
+        binding.chatsRecyclerView.visibility = View.VISIBLE
     }
 
     override fun onChatClicked(user: User) {
-        activity?.findNavController(R.id.fragmentContainerView)?.navigate(HomeFragmentDirections.actionHomeFragmentToChatRoomFragment(user))
+        activity?.findNavController(R.id.fragmentContainerView)
+            ?.navigate(HomeFragmentDirections.actionHomeFragmentToChatRoomFragment(user))
     }
 
 }

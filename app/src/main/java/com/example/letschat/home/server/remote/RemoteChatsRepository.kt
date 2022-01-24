@@ -10,8 +10,8 @@ import javax.inject.Inject
 class RemoteChatsRepository @Inject constructor(
     val firebaseService: FireBaseService
 ) {
-    val listOfLastMessagesForEachChatLiveData = MutableLiveData<List<ChatMessage?>>()
-    val listOfChattingUsersWithTheLastMessageLiveData = MutableLiveData<List<Pair<ChatMessage, User>>>()
+    val listOfLastMessagesForEachChatLiveData = MutableLiveData<Event<List<ChatMessage?>>>()
+    val listOfChattingUsersWithTheLastMessageLiveData = MutableLiveData<Event<List<Pair<ChatMessage, User>>>>()
 
 
     fun getLastMessageOfEachChat(listOfChatDocsIds: List<String>?) {

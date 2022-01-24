@@ -1,20 +1,23 @@
 package com.example.letschat.home.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.letschat.R
 import com.example.letschat.home.ui.IGenericFriends
+import com.example.letschat.user.FriendShipStatus
 import com.example.letschat.user.User
 import javax.inject.Inject
 
-class GenericFriendsAdapter:
+class GenericFriendsAdapter @Inject constructor(val context: Context):
     RecyclerView.Adapter<GenericFriendsAdapter.ViewHolder>() {
 
-    private val users = ArrayList<User>()
+    private var users = ArrayList<User>()
     private lateinit var genericGenericFriendsInterface: IGenericFriends
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,9 +37,13 @@ class GenericFriendsAdapter:
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.nameOfUser.text = users.get(position).userName
+        Glide
+            .with(context)
+            .load(users[position].profilePictureUrl)
+            .placeholder(R.drawable.outline_account_circle_black_48)
+            .into(holder.imageOfUser)
 
-
-        if (users[position].friendsOrNot) {
+        if (users[position].friendShipStatus == FriendShipStatus.FRIENDS) {
             holder.acceptFriendRequest.visibility = View.GONE
             holder.declineFriendRequest.visibility = View.GONE
 
@@ -61,13 +68,10 @@ class GenericFriendsAdapter:
         return users.size
     }
 
-    fun addFriendRequests(theUsers: ArrayList<User>) {
-        users.addAll(theUsers)
+    fun setUsers(theUsers: ArrayList<User>) {
+        users = theUsers
     }
 
-    fun addFriendRequest(user: User) {
-        users.add(user)
-    }
 
     fun removeFriendRequest(uid: String){
         users.filter { it.uid == uid }.let {

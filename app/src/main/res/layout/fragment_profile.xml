@@ -4,24 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-            <variable
-                name="viewModel"
-                type="com.example.letschat.home.view_models.AddFriendViewModel" />
+
+        <variable
+            name="viewModel"
+            type="com.example.letschat.home.view_models.AddFriendViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-
-        android:orientation="vertical"
+        android:id="@+id/profile_fragment_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/backGroundColor"
+        android:orientation="vertical"
         tools:context=".user.ProfileFragment">
 
-        <ImageView
-            android:id="@+id/imageView2"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/the_user_image"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_250sdp"
+
+            android:scaleType="centerCrop"
             android:src="@drawable/outline_account_circle_black_48"
-            android:background="@color/primaryColor"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -31,28 +35,49 @@
             android:id="@+id/the_user_info_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-
             android:layout_marginTop="@dimen/_30sdp"
+            android:gravity="center"
+
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2">
+            app:layout_constraintTop_toBottomOf="@+id/the_user_image">
 
-            <TextView
-                android:id="@+id/the_user_name"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="The User Name"
-                android:textSize="@dimen/_20sdp" />
+                android:gravity="center_vertical"
+                >
+
+                <TextView
+                    android:id="@+id/the_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="The User Name"
+                    android:textColor="@color/textColor"
+                    android:textSize="@dimen/_20sdp" />
+
+                <TextView
+                    android:id="@+id/the_user_friends"
+                    android:text="Friends"
+                    android:textSize="@dimen/_11sdp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_5sdp"
+                    android:textColor="@color/textColor"
+                    />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/the_user_current_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/user_current_status"
-                android:textSize="@dimen/_15sdp"
                 android:textColor="@color/green"
+                android:textSize="@dimen/_15sdp"
+
                 />
 
             <TextView
@@ -60,17 +85,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/user_number_of_friends"
+                android:textColor="@color/textColor"
                 android:textSize="@dimen/_15sdp" />
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/add_cancel_buttons_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-
             android:layout_marginBottom="@dimen/_30sdp"
+            android:gravity="center"
+
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -79,13 +105,25 @@
                 android:id="@+id/the_user_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/add" />
+                android:inputType="textCapWords"
+                android:text="@string/add"
+                android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/the_user_cancel_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/cancel_friend_request" />
-        </LinearLayout>
+                android:inputType="textCapWords"
+                android:text="@string/cancel_friend_request"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/the_user_accept_friend_request"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:text="@string/accept_friend_request"
+                android:visibility="gone" />
+        </RelativeLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -10,13 +10,12 @@ import com.example.letschat.auth.models.SignUpResultModel
 import com.example.letschat.auth.ui.LoginFragment
 import com.example.letschat.chatroom.chat.ChatMessage
 import com.example.letschat.other.*
+import com.example.letschat.user.FriendShipStatus
 import com.example.letschat.user.User
-import com.google.android.gms.tasks.Task
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import java.io.ByteArrayOutputStream
 import java.util.*
 import javax.inject.Inject
@@ -37,7 +36,7 @@ class FireBaseService @Inject constructor(
     val isUserNameTakenLiveData = MutableLiveData<Event<Boolean>>()
     val userInfoLiveData = MutableLiveData<User>()
     val isUserAddFriendRequestSuccessful = MutableLiveData<Event<Boolean>>()
-    val potentialFriendLiveData = MutableLiveData<User>()
+    val searchedUserLiveData = MutableLiveData<User?>()
 
     val friendRequestReactionLiveData = MutableLiveData<Event<obj>>()
     private val makingFriendsLiveData = MutableLiveData<Event<Boolean>>()
@@ -47,11 +46,11 @@ class FireBaseService @Inject constructor(
     val chatMessagesLiveData = MutableLiveData<List<ChatMessage>>()
 
     private var listOfLastMessagesForEachChat = ArrayList<ChatMessage?>()
-    val listOfLastMessagesForEachChatLiveData = MutableLiveData<List<ChatMessage?>>()
+    val listOfLastMessagesForEachChatLiveData = MutableLiveData<Event<List<ChatMessage?>>>()
 
     private var listOfChattingUsersWithTheLastMessage = ArrayList<Pair<ChatMessage, User>>()
     val listOfChattingUsersWithTheLastMessageLiveData =
-        MutableLiveData<List<Pair<ChatMessage, User>>>()
+        MutableLiveData<Event<List<Pair<ChatMessage, User>>>>()
 
     val uploadImageLiveData = MutableLiveData<Event<UploadImageObject>>()
 
@@ -151,7 +150,6 @@ class FireBaseService @Inject constructor(
             }
     }
 
-
     fun isUserAlreadyLoggedIn(): Pair<Boolean, String> {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -238,16 +236,41 @@ class FireBaseService @Inject constructor(
                         userDoc.get().addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val user = it.result.toObject(User::class.java)
-                                potentialFriendLiveData.value = user!!
+                                // check if that user if a friend of the current user
+                                // or have sent a fr
+                                // or the current user has sent them a friend request
+                                checkFriendShipStatus(user)
                             }
                         }
                     } else {
                         Log.d("Here", "No User name found")
+                        searchedUserLiveData.value = null
                     }
                 } else {
                     Log.d("Here", "Search user task unsuccessful")
                 }
             }
+    }
+
+    private fun checkFriendShipStatus(user: User?) {
+        user?.let {
+            db.collection("users")
+                .document(auth.currentUser?.uid!!)
+                .get()
+                .addOnSuccessListener { documentSnapShot ->
+                    when(it.uid){
+                        in documentSnapShot.get(FRIENDS) as ArrayList<String> -> it.friendShipStatus = FriendShipStatus.FRIENDS
+                        in documentSnapShot.get(SENT_FRIEND_REQUESTS) as ArrayList<String> -> it.friendShipStatus = FriendShipStatus.YOU_SENT_A_FRIEND_REQUEST
+                        in documentSnapShot.get(RECEIVED_FRIEND_REQUESTS) as ArrayList<String> -> it.friendShipStatus = FriendShipStatus.THEY_SENT_A_FRIEND_REQUEST
+                    }
+                    searchedUserLiveData.value = user
+                }
+                .addOnFailureListener {
+                    // cannot get the current user
+                    it.printStackTrace()
+                }
+        }
+
     }
 
     fun getAllFriendRequests() {
@@ -458,7 +481,12 @@ class FireBaseService @Inject constructor(
                     val document = task.result
                     val friendsIds: List<String>? =
                         document.get(FRIENDS) as? List<String>
-                    getFriendsFromTheirIds(friendsIds!!)
+                    if (friendsIds?.isEmpty()!!){
+                        friendsLiveData.value = Event(listOf())
+                    }else{
+                        getFriendsFromTheirIds(friendsIds)
+                    }
+
                 }
             }
     }
@@ -502,6 +530,8 @@ class FireBaseService @Inject constructor(
     }
 
     fun getAllPreviousMessages(docId: String) {
+        var timestamp: Timestamp? = null
+        var date: Date? = null
         db.collection("chats")
             .document(docId)
             .get()
@@ -509,18 +539,22 @@ class FireBaseService @Inject constructor(
                 if (task.isSuccessful) {
                     val listOFChatMessages = ArrayList<ChatMessage>()
                     val messages = task.result.data as HashMap<String, Any>?
-                    messages?.let {
-                        val list = it["messages"] as ArrayList<HashMap<String, Any>>
+                    messages?.let { msgs ->
+                        val list = msgs["messages"] as ArrayList<HashMap<String, Any>>
                         list.forEach {
+                            timestamp = it["time"] as Timestamp
+                            date = timestamp?.toDate()
                             listOFChatMessages.add(
                                 ChatMessage(
                                     it["senderId"].toString(),
                                     it["receiverId"].toString(),
                                     it["message"].toString(),
                                     "text",
-                                    null
+                                    date
                                 )
+
                             )
+                                Log.d("Here", "Time: ${listOFChatMessages[0].time.toString()}")
                         }
                     }
                     chatMessagesLiveData.value = listOFChatMessages
@@ -532,7 +566,7 @@ class FireBaseService @Inject constructor(
     fun getLastMessageOfEachChat(index: Int, listOfChatDocsIds: List<String>?) {
         if (index == listOfChatDocsIds?.size) {
             listOfLastMessagesForEachChat.let {
-                listOfLastMessagesForEachChatLiveData.value = it
+                listOfLastMessagesForEachChatLiveData.value = Event(it)
                 listOfLastMessagesForEachChat = arrayListOf()
             }
             return
@@ -566,7 +600,7 @@ class FireBaseService @Inject constructor(
 
     fun getTheChattingUsers(index: Int, listOfLastMessages: List<ChatMessage?>) {
         if (index == listOfLastMessages.size) {
-            listOfChattingUsersWithTheLastMessageLiveData.value = listOfChattingUsersWithTheLastMessage
+            listOfChattingUsersWithTheLastMessageLiveData.value = Event(listOfChattingUsersWithTheLastMessage)
             listOfChattingUsersWithTheLastMessage = arrayListOf() // making it empty
             return
         }

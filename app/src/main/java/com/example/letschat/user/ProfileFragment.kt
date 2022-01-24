@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import com.bumptech.glide.Glide
 import com.example.letschat.R
 import com.example.letschat.databinding.FragmentProfileBinding
 import com.example.letschat.di.AppContainer
@@ -28,18 +29,19 @@ class ProfileFragment : Fragment(), View.OnClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = DataBindingUtil.setContentView(requireActivity(), R.layout.fragment_profile)
+
+        binding = DataBindingUtil.bind(view.findViewById(R.id.profile_fragment_root)!!)!!
+
         appContainer = AppContainer(requireContext())
         addFriendViewModel = appContainer.addFriendViewModel
         binding.viewModel = addFriendViewModel
         binding.lifecycleOwner = this
 
-        val userJson= Gson().toJson(arguments?.get("searchedUser"))
-        searchedUser = Gson().fromJson(userJson, User::class.java)
+        searchedUser = ProfileFragmentArgs.fromBundle(requireArguments()).searchedUser
 
         observeAddFriend()
         setClickListeners()
-        showUserInfo(searchedUser)
+        updateUi(searchedUser)
     }
 
     private fun observeAddFriend() {
@@ -58,15 +60,57 @@ class ProfileFragment : Fragment(), View.OnClickListener {
     }
 
     private fun toggleAddButton() {
-        binding.theUserAdd.text = "Cancel Friend Request"
+        binding.theUserFriends.visibility = View.GONE
+        binding.theUserAdd.visibility = View.GONE
+        binding.theUserAcceptFriendRequest.visibility = View.GONE
+        binding.theUserCancelAdd.visibility = View.VISIBLE
     }
 
     private fun setClickListeners() {
         binding.theUserAdd.setOnClickListener(this)
     }
 
-    private fun showUserInfo(user: User?) {
-        binding.theUserName.text = user?.userName
+    private fun updateUi(user: User?) {
+        user?.let {
+            binding.theUserName.text = it.userName
+            Glide.with(requireContext())
+                .load(it.profilePictureUrl)
+                .placeholder(R.drawable.outline_account_circle_black_48)
+                .into(binding.theUserImage)
+
+            toggleFriendShipButton(user)
+
+        }
+
+    }
+
+    private fun toggleFriendShipButton(user: User) {
+        when(user.friendShipStatus){
+            FriendShipStatus.FRIENDS -> {
+                binding.theUserFriends.visibility = View.VISIBLE
+                binding.theUserAdd.visibility = View.GONE
+                binding.theUserAcceptFriendRequest.visibility = View.GONE
+                binding.theUserCancelAdd.visibility = View.GONE
+            }
+            FriendShipStatus.THEY_SENT_A_FRIEND_REQUEST -> {
+                binding.theUserFriends.visibility = View.GONE
+                binding.theUserAdd.visibility = View.GONE
+                binding.theUserAcceptFriendRequest.visibility = View.VISIBLE
+                binding.theUserCancelAdd.visibility = View.GONE
+            }
+            FriendShipStatus.YOU_SENT_A_FRIEND_REQUEST -> {
+                binding.theUserFriends.visibility = View.GONE
+                binding.theUserAdd.visibility = View.GONE
+                binding.theUserAcceptFriendRequest.visibility = View.GONE
+                binding.theUserCancelAdd.visibility = View.VISIBLE
+            }
+            FriendShipStatus.NONE ->{
+                binding.theUserFriends.visibility = View.GONE
+                binding.theUserAdd.visibility = View.VISIBLE
+                binding.theUserAcceptFriendRequest.visibility = View.GONE
+                binding.theUserCancelAdd.visibility = View.GONE
+            }
+        }
     }
 
     override fun onClick(view: View?) {

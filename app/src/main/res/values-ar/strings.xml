@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="login">تسجيل الدخول</string>
+    <string name="forgot_your_password">هل نسيت كلمة المرور؟</string>
+    <string name="or_continue_with">أو سجل عن طريق</string>
+    <string name="don_t_have_an_account">ليس لديك حساب؟</string>
+
+    <string name="sign_up">انشاء حساب</string>
+    <string name="log_out">تسجيل الخروج</string>
+
+    <string name="welcome">مرحبا</string>
+    <string name="already_have_an_account">لديك حساب بالفعل؟</string>
+
+    <string name="enter_friend_user_name">أدخل اسم صديقك</string>
+    <string name="cancel">الغاء</string>
+    <string name="ok">موافق</string>
+
+    <string name="user_current_status">متصل</string>
+    <string name="add">أضف</string>
+    <string name="cancel_friend_request">الغاء طلب الصداقة</string>
+    <string name="message">الرسالة:</string>
+    <string name="no_messages">لا توجد رسائل</string>
+    <string name="no_friend_requests">لا توجد طلبات صداقة</string>
+    <string name="aa">أ:</string>
+    <string name="settings">الاعدادات</string>
+
+    <string name="chats">الدردشات</string>
+    <string name="friends">الأصدقاء</string>
+    <string name="friend_requests">طلبات الصداقة</string>
+
+    <string name="accept_friend_request">اقبل طلب الصداقة</string>
+    <string name="no_chats">لا توجد دردشات</string>
+    <string name="no_friends">لا يوجد أصدقاء</string>
+
+</resources>

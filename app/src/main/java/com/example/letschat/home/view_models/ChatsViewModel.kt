@@ -20,8 +20,8 @@ class ChatsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val allChatsLiveData = MutableLiveData<Event<List<String>>>()
-    val listOfLastMessagesForEachChatLiveData = MutableLiveData<List<ChatMessage?>>()
-    val listOfChattingUsersWithTheLastMessageLiveData = MutableLiveData<List<Pair<ChatMessage, User>>>()
+    val listOfLastMessagesForEachChatLiveData = MutableLiveData<Event<List<ChatMessage?>>>()
+    val listOfChattingUsersWithTheLastMessageLiveData = MutableLiveData<Event<List<Pair<ChatMessage, User>>>>()
 
     fun getAllChatsFromCache() {
         viewModelScope.launch {

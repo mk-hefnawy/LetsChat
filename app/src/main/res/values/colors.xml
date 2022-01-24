@@ -17,4 +17,8 @@
 
     <color name="primaryColor">#6B74CF</color>
     <color name="secondaryColor">#37474f</color>
+
+    <!-- For Light Mode -->
+    <color name="backGroundColor">@color/white</color>
+    <color name="textColor">@color/black</color>
 </resources>

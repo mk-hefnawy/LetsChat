@@ -1,5 +1,6 @@
 package com.example.letschat.home.view_models
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.letschat.auth.helper_classes.AuthValidator
@@ -12,7 +13,7 @@ class AddFriendViewModel(
     private val  addFriendRepository: AddFriendRepository
 ): ViewModel() {
     var userNameOfFriend = ""
-    val searchedUserLiveData = MutableLiveData<User>()
+    val searchedUserLiveData = MutableLiveData<User?>()
     val isUserAddFriendRequestSuccessful = MutableLiveData<Event<Boolean>>()
 
     fun searchUser(){

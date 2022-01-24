@@ -10,7 +10,7 @@ import com.example.letschat.chatroom.data.local.ChatRoomDao
 import com.example.letschat.home.server.local.ChatsDao
 import com.example.letschat.user.User
 
-@Database(entities = [User::class, ChatRoom::class], version = 3)
+@Database(entities = [User::class, ChatRoom::class], version = 5)
 abstract class AppRoomDatabase : RoomDatabase() {
 
     abstract fun authDao(): AuthDao
