@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name" translatable="false">LetsChat</string>
+    <string name="login">Login</string>
+    <string name="forgot_your_password">Forgot your password?</string>
+    <string name="or_continue_with">or continue with</string>
+    <string name="google" translatable="false">Google</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign up</string>
+    <string name="log_out">Log out</string>
+    <string name="welcome">Welcome</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="enter_friend_user_name">Enter friend user name</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="letschat" translatable="false">LetsChat</string>
+    <string name="user_current_status">Online</string>
+    <string name="user_number_of_friends" translatable="false">10</string>
+    <string name="add">add</string>
+    <string name="cancel_friend_request">Cancel Friend Request</string>
+    <string name="message">Message:</string>
+    <string name="no_messages">No Messages</string>
+    <string name="no_friend_requests">No Friend Requests</string>
+    <string name="aa">Aa:</string>
+    <string name="settings">Settings</string>
+    <string name="chats">Chats</string>
+    <string name="friends">Friends</string>
+    <string name="friend_requests">Friend Requests</string>
+
+
+</resources>
