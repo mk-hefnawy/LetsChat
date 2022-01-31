@@ -15,6 +15,11 @@ data class User(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
     var friendShipStatus: FriendShipStatus = FriendShipStatus.NONE
+
+    var receivedFriendRequests = mutableListOf<String>()
+    var sentFriendRequests = mutableListOf<String>()
+    var friends = mutableListOf<String>()
+    var chats = mutableListOf<String>()
 }
 
 enum class FriendShipStatus{
@@ -23,3 +28,4 @@ enum class FriendShipStatus{
     YOU_SENT_A_FRIEND_REQUEST,
     THEY_SENT_A_FRIEND_REQUEST
 }
+

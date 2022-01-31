@@ -44,10 +44,10 @@ class ChatsFragment : Fragment(), ChatsInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUp()
-        observeAllChatsFromCache()
         observeLastMessagesForEachChat()
         observeTheListOfChattingUsersWithTheLastMessage()
-        getAllChatsFromCache()
+        //getAllChatsFromCache()
+        getAllChatsFromServer()
 
     }
 
@@ -57,6 +57,10 @@ class ChatsFragment : Fragment(), ChatsInterface {
 
     private fun getAllChatsFromCache() {
         viewModel.getAllChatsFromCache()
+    }
+
+    private fun getAllChatsFromServer(){
+        viewModel.getAllChatsFromServer()
     }
 
     private fun observeAllChatsFromCache() {
@@ -75,6 +79,7 @@ class ChatsFragment : Fragment(), ChatsInterface {
     private fun observeLastMessagesForEachChat() {
         viewModel.listOfLastMessagesForEachChatLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let {
+                Log.d("Here", "observeLastMessagesForEachChat")
                 viewModel.getTheChattingUsers(it)
             }
         }

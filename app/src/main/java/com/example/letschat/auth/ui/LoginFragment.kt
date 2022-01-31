@@ -20,7 +20,6 @@ class LoginFragment : Fragment(), View.OnClickListener {
     private lateinit var loginFragmentBinding: FragmentLoginBinding
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var appContainer: AppContainer
-    private lateinit var navController: NavController
 
 
     companion object {
@@ -47,17 +46,13 @@ class LoginFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setUp() {
-        loginFragmentBinding = DataBindingUtil.setContentView(
-            requireActivity(), R.layout.fragment_login
-        )
+        loginFragmentBinding =  DataBindingUtil.bind(view?.findViewById(R.id.login_fragment_root)!!)!!
         appContainer = AppContainer(requireContext())
 
         loginViewModel = appContainer.loginViewModel
 
         loginFragmentBinding.viewModel = loginViewModel
         loginFragmentBinding.lifecycleOwner = viewLifecycleOwner
-
-        navController = findNavController()
     }
 
     private fun observeLoginResult() {
@@ -110,7 +105,7 @@ class LoginFragment : Fragment(), View.OnClickListener {
 
     private fun goToHomeFragment() {
         Log.d("Here", "Going To Home From Login")
-        navController.navigate(LoginFragmentDirections.actionLoginToHome())
+        findNavController().navigate(LoginFragmentDirections.actionLoginToHome())
     }
 
     private fun showPasswordError(message: String) {
@@ -136,6 +131,6 @@ class LoginFragment : Fragment(), View.OnClickListener {
     }
 
     private fun goToSignUpFragment() {
-        navController.navigate(LoginFragmentDirections.actionLoginToSignUp())
+        findNavController().navigate(LoginFragmentDirections.actionLoginToSignUp())
     }
 }

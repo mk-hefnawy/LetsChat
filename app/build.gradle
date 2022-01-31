@@ -86,6 +86,9 @@ dependencies {
     // fire base storage
     implementation 'com.google.firebase:firebase-storage:20.0.0'
 
+    // fire base ui firestore
+    implementation 'com.firebaseui:firebase-ui-firestore:6.2.1'
+
     // Multi Dex
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"

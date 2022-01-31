@@ -28,4 +28,11 @@ class RemoteChatsRepository @Inject constructor(
         }
     }
 
+    fun getAllChatsFromServer() {
+        firebaseService.getAllChatsFromServer()
+        firebaseService.listOfLastMessagesForEachChatLiveData.observeForever {
+            listOfLastMessagesForEachChatLiveData.value = it
+        }
+    }
+
 }

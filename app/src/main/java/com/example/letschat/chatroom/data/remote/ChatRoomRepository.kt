@@ -14,6 +14,8 @@ class ChatRoomRepository @Inject constructor(
     val chatMessageLiveData = MutableLiveData<Event<Pair<Boolean, ChatMessage>>>()
     val chatMessagesLiveData = MutableLiveData<List<ChatMessage>>()
 
+    val addedMessagesToChatRoomLiveData = MutableLiveData<Event<ChatMessage>>()
+
      fun sendChatMessage(chatMessage: ChatMessage, docId: String) {
         fireBaseService.sendChatMessage(docId, chatMessage)
         fireBaseService.chatMessageLiveData.observeForever {
@@ -32,6 +34,13 @@ class ChatRoomRepository @Inject constructor(
         fireBaseService.getAllPreviousMessages(docId)
         fireBaseService.chatMessagesLiveData.observeForever {
             chatMessagesLiveData.value = it
+        }
+    }
+
+    fun listenForChatRoomChanges(docId: String) {
+        fireBaseService.listenForChatRoomChanges(docId)
+        fireBaseService.addedMessagesToChatRoomLiveData.observeForever {
+            addedMessagesToChatRoomLiveData.value = it
         }
     }
 }

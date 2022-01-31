@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -23,13 +24,16 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.*
 import com.bumptech.glide.Glide
 import com.example.letschat.R
+import com.example.letschat.chatroom.chat.ChatMessage
 import com.example.letschat.databinding.ActivityBaseBinding
 import com.example.letschat.home.ui.HomeFragment
+import com.example.letschat.home.view_models.ChatsViewModel
 import com.example.letschat.home.view_models.HomeViewModel
 import com.example.letschat.server.local.DataStorePreferences.DataStoreImp
 import com.example.letschat.server.local.DataStorePreferences.DataStorePreferencesConstants
 import com.example.letschat.user.User
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.firestore.DocumentChange
 import dagger.hilt.android.AndroidEntryPoint
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.flow.collect
@@ -46,6 +50,7 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var navHeader: View
 
     val baseViewModel: BaseViewModel by viewModels()
+    val chatsViewModel: ChatsViewModel by viewModels()
 
     @Inject
     lateinit var dataStoreImp: DataStoreImp
@@ -65,9 +70,35 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(view)
 
         init()
+        //getAllChats()
+
         setOnClickListeners()
         setOnDestinationChangedListener()
         observeUploadImage()
+    }
+
+    private fun observeAllChats() {
+        chatsViewModel.allChatsLiveData.observe(this, {
+
+        })
+    }
+
+    private fun getAllChats() {
+        chatsViewModel.getAllChatsFromCache()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        //observeAllChats()
+       // listenToChatsChanges() // so when our app is in the bg (in the ram), the listening would not be going on.
+    }
+
+    private fun listenToChatsChanges(){
+        baseViewModel.listenToChatsChanges()
+        baseViewModel.addedMessagesLiveData.observeForever {
+            Log.d("Here", "Number of added Messages: ${it.size}")
+            Log.d("Here", "Added Message 1 : ${it[0].message}")
+        }
     }
 
 
@@ -143,8 +174,8 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
                         View.VISIBLE
 
                     // el mo4kla kda en kol ma el home fragment tegy lel forground, hro7 ageb el user info
-                    getUserForDrawer()
-                    observeUserForDrawer()
+                    //getUserForDrawer()
+                    //observeUserForDrawer() // lazm yb2o b3d el sync bta3 el home
                 }
 
                 R.id.settingsFragment -> {

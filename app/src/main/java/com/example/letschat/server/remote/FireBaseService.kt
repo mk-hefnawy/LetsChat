@@ -9,6 +9,7 @@ import com.example.letschat.auth.models.LoginResultModel
 import com.example.letschat.auth.models.SignUpResultModel
 import com.example.letschat.auth.ui.LoginFragment
 import com.example.letschat.chatroom.chat.ChatMessage
+import com.example.letschat.chatroom.chat.ChatRoom
 import com.example.letschat.other.*
 import com.example.letschat.user.FriendShipStatus
 import com.example.letschat.user.User
@@ -20,12 +21,13 @@ import java.io.ByteArrayOutputStream
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class FireBaseService @Inject constructor(
     val auth: FirebaseAuth,
     val db: FirebaseFirestore
 ) {
+    val chatsReference = db.collection("chats")
+    val usersReference = db.collection("users")
 
     val signUpResult: MutableLiveData<Event<SignUpResultModel>> = MutableLiveData()
     val loginLiveData: MutableLiveData<Event<Boolean>> = MutableLiveData()
@@ -54,18 +56,24 @@ class FireBaseService @Inject constructor(
 
     val uploadImageLiveData = MutableLiveData<Event<UploadImageObject>>()
 
+    lateinit var chatsChangesListener: ListenerRegistration
+    val addedMessagesLiveData = MutableLiveData<ArrayList<ChatMessage>>()
+    val addedMessagesToChatRoomLiveData = MutableLiveData<Event<ChatMessage>>()
+
+    val userDataInServerLiveData = MutableLiveData<Event<User>>()
+    val userChatsInServerLiveData = MutableLiveData<Event<List<ChatRoom>>>()
+
     object obj {
         var result = true
         lateinit var message: String
         var uid = ""
     }
 
-    object UploadImageObject{
+    object UploadImageObject {
         var result = true
         lateinit var bitmap: Bitmap
         lateinit var profilePictureUrl: String
     }
-
 
 
     fun signUp(userName: String, email: String, password: String) {
@@ -117,7 +125,8 @@ class FireBaseService @Inject constructor(
             PROFILE_PICTURE_URL to "",
             RECEIVED_FRIEND_REQUESTS to mutableListOf<String>(),
             SENT_FRIEND_REQUESTS to mutableListOf<String>(),
-            FRIENDS to mutableListOf<String>()
+            FRIENDS to mutableListOf<String>(),
+            CHATS to mutableListOf<String>()
         )
         db.collection("users")
             .document(user.uid)
@@ -258,10 +267,13 @@ class FireBaseService @Inject constructor(
                 .document(auth.currentUser?.uid!!)
                 .get()
                 .addOnSuccessListener { documentSnapShot ->
-                    when(it.uid){
-                        in documentSnapShot.get(FRIENDS) as ArrayList<String> -> it.friendShipStatus = FriendShipStatus.FRIENDS
-                        in documentSnapShot.get(SENT_FRIEND_REQUESTS) as ArrayList<String> -> it.friendShipStatus = FriendShipStatus.YOU_SENT_A_FRIEND_REQUEST
-                        in documentSnapShot.get(RECEIVED_FRIEND_REQUESTS) as ArrayList<String> -> it.friendShipStatus = FriendShipStatus.THEY_SENT_A_FRIEND_REQUEST
+                    when (it.uid) {
+                        in documentSnapShot.get(FRIENDS) as ArrayList<String> -> it.friendShipStatus =
+                            FriendShipStatus.FRIENDS
+                        in documentSnapShot.get(SENT_FRIEND_REQUESTS) as ArrayList<String> -> it.friendShipStatus =
+                            FriendShipStatus.YOU_SENT_A_FRIEND_REQUEST
+                        in documentSnapShot.get(RECEIVED_FRIEND_REQUESTS) as ArrayList<String> -> it.friendShipStatus =
+                            FriendShipStatus.THEY_SENT_A_FRIEND_REQUEST
                     }
                     searchedUserLiveData.value = user
                 }
@@ -481,9 +493,9 @@ class FireBaseService @Inject constructor(
                     val document = task.result
                     val friendsIds: List<String>? =
                         document.get(FRIENDS) as? List<String>
-                    if (friendsIds?.isEmpty()!!){
+                    if (friendsIds?.isEmpty()!!) {
                         friendsLiveData.value = Event(listOf())
-                    }else{
+                    } else {
                         getFriendsFromTheirIds(friendsIds)
                     }
 
@@ -492,36 +504,54 @@ class FireBaseService @Inject constructor(
     }
 
     fun sendFirstMessage(firstChatMessage: ChatMessage) {
-        firstChatMessage.senderId = auth.currentUser?.uid!!
         val hash = hashMapOf(
-            "messages" to arrayListOf(firstChatMessage)
+            "firstUserId" to auth.currentUser!!.uid,
+            "secondUserId" to firstChatMessage.receiverId
         )
-        db.collection("chats")
-            .add(hash)
+        firstChatMessage.senderId = auth.currentUser?.uid!!
+        usersReference.document(auth.currentUser?.uid!!).collection("chats").add(hash)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val chatDocId = task.result.id
-                    Log.d("Here", "ChatDocId: ${chatDocId}")
-                    chatRoomDocumentId.value = Event(Pair(chatDocId, firstChatMessage))
+                    addDocToOtherUser(chatDocId, hash, firstChatMessage)
+
+                    Log.d("Here", "ChatDocId: db${chatDocId}")
+
                 } else {
                     Log.d("Here", "Error getting the chat document")
                 }
             }
     }
 
-    fun sendChatMessage(chatDocId: String, chatMessage: ChatMessage) {
-        chatMessage.senderId = auth.currentUser?.uid!!
-        db.collection("chats")
-            .document(chatDocId)
-            .update("messages", FieldValue.arrayUnion(chatMessage))
+    private fun addDocToOtherUser(
+        chatDocId: String,
+        hash: HashMap<String, String>,
+        firstChatMessage: ChatMessage
+    ) {
+        usersReference.document(firstChatMessage.receiverId).collection("chats").document(chatDocId)
+            .set(hash)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // live data stuff
-                    Log.d("Here", "Message Added")
-                    chatMessageLiveData.value = Event(Pair(true, chatMessage))
+                    addFirstMessage(firstChatMessage, chatDocId)
                 } else {
-                    chatMessageLiveData.value = Event(Pair(false, chatMessage))
+                    Log.d("Here", "Error creating the chat document for the other user")
+
                 }
+            }
+    }
+
+
+    private fun addFirstMessage(firstChatMessage: ChatMessage, chatDocId: String) {
+        usersReference.document(auth.currentUser!!.uid).collection("chats").document(chatDocId)
+            .collection("messages")
+            .add(firstChatMessage)
+            .addOnSuccessListener {
+                usersReference.document(firstChatMessage.receiverId).collection("chats")
+                    .document(chatDocId).collection("messages")
+                    .add(firstChatMessage)
+                    .addOnSuccessListener {
+                        addChatToBothUsers(chatDocId, firstChatMessage.receiverId, firstChatMessage)
+                    }
 
             }
             .addOnFailureListener {
@@ -529,37 +559,59 @@ class FireBaseService @Inject constructor(
             }
     }
 
+    private fun addChatToBothUsers(
+        chatDocId: String,
+        otherUserId: String,
+        firstChatMessage: ChatMessage
+    ) {
+        usersReference.document(auth.currentUser!!.uid)
+            .update(CHATS, FieldValue.arrayUnion(chatDocId)).addOnSuccessListener {
+                usersReference.document(otherUserId).update(CHATS, FieldValue.arrayUnion(chatDocId))
+                    .addOnSuccessListener {
+                        chatRoomDocumentId.value = Event(Pair(chatDocId, firstChatMessage))
+                    }.addOnFailureListener {
+                        it.printStackTrace()
+                    }
+            }.addOnFailureListener {
+                it.printStackTrace()
+            }
+    }
+
+    fun sendChatMessage(chatDocId: String, chatMessage: ChatMessage) {
+        chatMessage.senderId = auth.currentUser?.uid!!
+        usersReference.document(auth.currentUser?.uid!!).collection("chats").document(chatDocId)
+            .collection("messages")
+            .add(chatMessage)
+            .addOnSuccessListener {
+                usersReference.document(chatMessage.receiverId).collection("chats")
+                    .document(chatDocId).collection("messages")
+                    .add(chatMessage)
+                    .addOnSuccessListener {
+                        chatMessageLiveData.value = Event(Pair(true, chatMessage))
+                    }.addOnFailureListener {
+                        chatMessageLiveData.value = Event(Pair(false, chatMessage))
+                    }
+            }.addOnFailureListener {
+                chatMessageLiveData.value = Event(Pair(false, chatMessage))
+            }
+    }
+
     fun getAllPreviousMessages(docId: String) {
-        var timestamp: Timestamp? = null
-        var date: Date? = null
-        db.collection("chats")
-            .document(docId)
+        usersReference.document(auth.currentUser!!.uid).collection("chats").document(docId)
+            .collection("messages")
+            .orderBy("time", Query.Direction.ASCENDING)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val listOFChatMessages = ArrayList<ChatMessage>()
-                    val messages = task.result.data as HashMap<String, Any>?
-                    messages?.let { msgs ->
-                        val list = msgs["messages"] as ArrayList<HashMap<String, Any>>
-                        list.forEach {
-                            timestamp = it["time"] as Timestamp
-                            date = timestamp?.toDate()
-                            listOFChatMessages.add(
-                                ChatMessage(
-                                    it["senderId"].toString(),
-                                    it["receiverId"].toString(),
-                                    it["message"].toString(),
-                                    "text",
-                                    date
-                                )
-
-                            )
-                                Log.d("Here", "Time: ${listOFChatMessages[0].time.toString()}")
-                        }
+                    val messagesDocuments = task.result.documents
+                    messagesDocuments.forEach { doc ->
+                        listOFChatMessages.add(doc.toObject(ChatMessage::class.java)!!)
                     }
                     chatMessagesLiveData.value = listOFChatMessages
+                } else {
+                    task.exception?.printStackTrace()
                 }
-
             }
     }
 
@@ -571,26 +623,13 @@ class FireBaseService @Inject constructor(
             }
             return
         }
-
-        var lastMessage: ChatMessage? = null
-        db.collection("chats")
-            .document(listOfChatDocsIds?.get(index)!!)
+        usersReference.document(auth.currentUser!!.uid).collection("chats")
+            .document(listOfChatDocsIds?.get(index)!!).collection("messages")
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val messages = task.result.data as HashMap<String, Any>?
-                    messages?.let {
-                        val list = it["messages"] as ArrayList<HashMap<String, Any>>
-                        val lastChatMessageAsHash = list.last()
-                        lastMessage = ChatMessage(
-                            lastChatMessageAsHash["senderId"].toString(),
-                            lastChatMessageAsHash["receiverId"].toString(),
-                            lastChatMessageAsHash["message"].toString(),
-                            "text",
-                            null
-                        )
-                    }
-
+                    val messagesDocuments = task.result.documents
+                    val lastMessage = getLastMessageByTime(messagesDocuments)
                     listOfLastMessagesForEachChat.add(lastMessage)
                     getLastMessageOfEachChat(index + 1, listOfChatDocsIds)
                 }
@@ -598,9 +637,24 @@ class FireBaseService @Inject constructor(
 
     }
 
+    private fun getLastMessageByTime(messagesDocuments: List<DocumentSnapshot>): ChatMessage {
+        val messages = ArrayList<ChatMessage>()
+        messagesDocuments.forEach {
+            messages.add(it.toObject(ChatMessage::class.java)!!)
+        }
+        var lastMessage = messages[0]
+        for (i in messages.indices) {
+            if (messages[i].time!!.after(lastMessage.time)) {
+                lastMessage = messages[i]
+            }
+        }
+        return lastMessage
+    }
+
     fun getTheChattingUsers(index: Int, listOfLastMessages: List<ChatMessage?>) {
         if (index == listOfLastMessages.size) {
-            listOfChattingUsersWithTheLastMessageLiveData.value = Event(listOfChattingUsersWithTheLastMessage)
+            listOfChattingUsersWithTheLastMessageLiveData.value =
+                Event(listOfChattingUsersWithTheLastMessage)
             listOfChattingUsersWithTheLastMessage = arrayListOf() // making it empty
             return
         }
@@ -616,7 +670,12 @@ class FireBaseService @Inject constructor(
             .addOnSuccessListener { docSnapShot ->
 
                 val chattingUser = docSnapShot.toObject(User::class.java)
-                listOfChattingUsersWithTheLastMessage.add(Pair(listOfLastMessages[index]!!, chattingUser!!))
+                listOfChattingUsersWithTheLastMessage.add(
+                    Pair(
+                        listOfLastMessages[index]!!,
+                        chattingUser!!
+                    )
+                )
                 getTheChattingUsers(index + 1, listOfLastMessages)
             }
             .addOnFailureListener {
@@ -626,7 +685,8 @@ class FireBaseService @Inject constructor(
 
     fun uploadImage(bitmap: Bitmap) {
         val storageRef = FirebaseStorage.getInstance().reference
-        val currentUserProfilePictureReference = storageRef.child("usersImages/" + UUID.randomUUID().toString())
+        val currentUserProfilePictureReference =
+            storageRef.child("usersImages/" + UUID.randomUUID().toString())
 
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
@@ -636,23 +696,23 @@ class FireBaseService @Inject constructor(
 
         uploadTask.addOnSuccessListener {
             val urlTask = uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful){
-                   task.exception?.let {
-                       throw it
-                   }
+                if (!task.isSuccessful) {
+                    task.exception?.let {
+                        throw it
+                    }
                 }
                 currentUserProfilePictureReference.downloadUrl
             }
-                .addOnCompleteListener { task->
-                    if (task.isSuccessful){
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
                         val downloadUri = task.result
                         setUserProfilePicture(downloadUri, bitmap)
-                    }else{
+                    } else {
                         Log.d("Here", "Error Getting the Picture Url")
                     }
                 }
         }
-        uploadTask.addOnFailureListener{
+        uploadTask.addOnFailureListener {
             UploadImageObject.bitmap = bitmap
             UploadImageObject.result = false
             UploadImageObject.profilePictureUrl = ""
@@ -664,7 +724,10 @@ class FireBaseService @Inject constructor(
         downloadUri?.let {
             db.collection("users")
                 .document(auth.currentUser?.uid!!)
-                .update(PROFILE_PICTURE_URL, downloadUri.toString()) // notice toString(), because uri exceeds the max length
+                .update(
+                    PROFILE_PICTURE_URL,
+                    downloadUri.toString()
+                ) // notice toString(), because uri exceeds the max length
                 .addOnSuccessListener {
                     UploadImageObject.bitmap = bitmap
                     UploadImageObject.profilePictureUrl = downloadUri.toString()
@@ -675,4 +738,86 @@ class FireBaseService @Inject constructor(
                 }
         }
     }
+
+    fun listenToChatsChanges() {
+        val addedMessages = ArrayList<ChatMessage>()
+        chatsChangesListener =
+            chatsReference.document(auth.currentUser!!.uid).collection("messages")
+                .addSnapshotListener { snapshots, e ->
+                    if (e != null) {
+                        Log.w("Here", "listen:error", e)
+                        return@addSnapshotListener
+                    }
+
+                    for (documentChange in snapshots!!.documentChanges) {
+                        when (documentChange.type) {
+                            DocumentChange.Type.ADDED -> addedMessages.add(
+                                documentChange.document.toObject(
+                                    ChatMessage::class.java
+                                )
+                            )
+                            else -> Log.d("Here", "The Doc change type is ${documentChange.type}")
+                        }
+                    }
+                    addedMessagesLiveData.value = addedMessages
+                }
+    }
+
+    fun detachChatsChangesListener() {
+        chatsChangesListener.remove()
+    }
+
+    fun listenForChatRoomChanges(docId: String) {
+        usersReference.document(auth.currentUser!!.uid).collection("chats").document(docId)
+            .collection("messages").addSnapshotListener { snapShot, e ->
+            if (e != null) {
+                e.printStackTrace()
+            }
+            for (dc in snapShot!!.documentChanges) {
+                when (dc.type) {
+                    DocumentChange.Type.ADDED -> addedMessagesToChatRoomLiveData.value =
+                        Event(dc.document.toObject(ChatMessage::class.java))
+                }
+            }
+
+        }
+    }
+
+    fun getUserDataFromServer() {
+        usersReference.document(auth.currentUser!!.uid).get().addOnSuccessListener { docSnapShot ->
+            userDataInServerLiveData.value = Event(docSnapShot.toObject(User::class.java)!!)
+        }
+            .addOnFailureListener {
+                it.printStackTrace()
+                Log.d("Here", "Cannot Get User Data From Server")
+            }
+    }
+
+    fun getAllChatsFromServer() {
+        val chatDocumentsIds = mutableListOf<String>()
+        usersReference.document(auth.currentUser!!.uid).collection("chats").get()
+            .addOnSuccessListener { documents ->
+                Log.d("Here", "Number Of Chat Documents: ${documents.size()}")
+                documents.forEach {
+                    chatDocumentsIds.add(it.id)
+                }
+                Log.d("Here", "Number Of Chats: ${chatDocumentsIds.size}")
+                getLastMessageOfEachChat(0, chatDocumentsIds)
+            }
+    }
+
+    fun getUserChatsFromServer() {
+        val userChats = mutableListOf<ChatRoom>()
+        usersReference.document(auth.currentUser!!.uid).collection("chats").get()
+            .addOnSuccessListener { documents->
+                documents.forEach { queryDocSnapshot ->
+                    userChats.add(ChatRoom(queryDocSnapshot.get("firstUserId").toString(),
+                        queryDocSnapshot.get("secondUserId").toString(),
+                        queryDocSnapshot.id))
+                }
+                userChatsInServerLiveData.value = Event(userChats)
+
+            }
+    }
+
 }

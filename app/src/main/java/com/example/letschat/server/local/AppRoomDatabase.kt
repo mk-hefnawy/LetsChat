@@ -4,13 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.letschat.auth.server.local.user.AuthDao
 import com.example.letschat.chatroom.chat.ChatRoom
 import com.example.letschat.chatroom.data.local.ChatRoomDao
 import com.example.letschat.home.server.local.ChatsDao
 import com.example.letschat.user.User
 
-@Database(entities = [User::class, ChatRoom::class], version = 5)
+@Database(entities = [User::class, ChatRoom::class], version = 6)
+@TypeConverters(Converters::class)
 abstract class AppRoomDatabase : RoomDatabase() {
 
     abstract fun authDao(): AuthDao

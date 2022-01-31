@@ -46,7 +46,6 @@ class AppContainer(context: Context) {
 
 
     var loginViewModel: LoginViewModel = LoginViewModelFactory(validator, loginRepo, federatedLoginManager).create()
-    var homeViewModel: HomeViewModel = HomeViewModelFactory(validator, homeRepo, localHomeRepository).create()
     var signUpViewModel: SignUpViewModel = SignUpViewModelFactory(validator, signUpRepo, localUserRepository).create()
     val addFriendViewModel = AddFriendViewModel(validator, addFriendRepository)
     val friendRequestsViewModel = FriendRequestsViewModel(friendRequestsRepository)

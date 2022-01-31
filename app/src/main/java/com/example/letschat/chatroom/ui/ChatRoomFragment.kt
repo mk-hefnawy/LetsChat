@@ -13,7 +13,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
@@ -24,22 +23,19 @@ import com.example.letschat.chatroom.chat.ChatMessage
 import com.example.letschat.chatroom.chat.ChatRoomViewModel
 import com.example.letschat.chatroom.helpers.Validator
 import com.example.letschat.databinding.FragmentChatRoomBinding
-import com.example.letschat.other.CircularImageView
-import com.example.letschat.other.DOC_DOES_NOT_EXIST
-import com.example.letschat.other.DOC_EXISTS
 import com.example.letschat.user.User
-import com.google.gson.Gson
+import com.google.firebase.firestore.Query
 import dagger.hilt.android.AndroidEntryPoint
-import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
-
 
 @AndroidEntryPoint
 class ChatRoomFragment : Fragment(), View.OnClickListener {
     lateinit var binding: FragmentChatRoomBinding
     lateinit var chattingUser: User
+
+    lateinit var query: Query
 
     @Inject
     lateinit var messageValidator: Validator
@@ -65,8 +61,20 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         observeMessageEditTextChanges()
         observeChatDocumentId()
         observeChatMessageLiveData()
+        observeAddedMessagesToChatRoom()
         getChatDocument(chattingUser)
+    }
 
+    private fun observeAddedMessagesToChatRoom() {
+        viewModel.addedMessagesToChatRoomLiveData.observe(viewLifecycleOwner){ res ->
+            res.getContentIfNotHandled()?.let {
+                Log.d("Here", "Message Added")
+                adapter.addMessage(it)
+                adapter.notifyItemInserted(adapter.itemCount - 1)
+                binding.messagesRecyclerView.scrollToPosition(adapter.itemCount - 1)
+            }
+
+        }
     }
 
     private fun getChatDocument(chattingUser: User) {
@@ -84,6 +92,8 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
                     // there was a chat before
                     Log.d("Here", "Getting Previous Messages")
                     showPreviousMessages(it[0])
+                    listenForChatRoomChanges(it[0])
+
                 }
                 viewModel.chatRoomDocIdLiveData.removeObservers(viewLifecycleOwner)
             }
@@ -91,6 +101,10 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         // why removing the observer? because we have two observers on the same live data of Event
         // which does not support multiple observers
 
+    }
+
+    private fun listenForChatRoomChanges(chatDocId: String) {
+        viewModel.listenForChatRoomChanges(chatDocId)
     }
 
     private fun showPreviousMessages(docId: String) {
@@ -212,11 +226,12 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
                 if (roomDatabaseInsertResponse != -1L) {
                     // doc cached successfully
                     // just init
-                    adapter.setMessages(arrayListOf())
-                    addNewMessageToAdapter(chatMessage)
-                    adapter.notifyDataSetChanged()
+                    //adapter.setMessages(arrayListOf())
+                    //addNewMessageToAdapter(chatMessage)
+                   // adapter.notifyDataSetChanged()
                     binding.messagesRecyclerView.visibility = View.VISIBLE
                     binding.noPreviousMessages.visibility = View.GONE
+                    binding.roomMessageEditText.setText("")
                     Toast.makeText(
                         requireContext(),
                         "First Message Sent Successfully",
@@ -238,7 +253,8 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         viewModel.chatMessageLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let { (res, chatMessage) ->
                 if (res) {
-                    addNewMessageToAdapter(chatMessage)
+                    //addNewMessageToAdapter(chatMessage)
+                    binding.roomMessageEditText.setText("")
                     Toast.makeText(
                         requireContext(),
                         "Message Sent Successfully",

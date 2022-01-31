@@ -1,28 +1,16 @@
 package com.example.letschat.home.ui
 
-import android.app.Activity
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.ImageView
 import androidx.fragment.app.Fragment
-import android.widget.TextView
 import android.widget.Toast
-import android.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
-import com.bumptech.glide.Glide
 import com.example.letschat.R
+import com.example.letschat.chatroom.chat.ChatRoom
 import com.example.letschat.databinding.FragmentHomeBinding
 import com.example.letschat.di.AppContainer
 import com.example.letschat.home.adapters.FragmentsAdapter
@@ -30,20 +18,21 @@ import com.example.letschat.home.view_models.HomeViewModel
 import com.example.letschat.user.User
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeFragment : Fragment(), View.OnClickListener{
 
     private lateinit var homeFragmentBinding: FragmentHomeBinding
-    private lateinit var homeViewModel: HomeViewModel
+    val homeViewModel: HomeViewModel by viewModels()
     private lateinit var appContainer: AppContainer
     private lateinit var navController: NavController
 
     private lateinit var fragmentsAdapter: FragmentsAdapter
-    private lateinit var header: View
+    private var hasFragmentBeenVisible = false
 
     private companion object {
         private const val TAG = "HomeFragmentHere"
@@ -61,8 +50,15 @@ class HomeFragment : Fragment(), View.OnClickListener{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setUp()
+        if (!hasFragmentBeenVisible){
+            syncCacheWithServer()
+        }else{
+            hasFragmentBeenVisible = true
+            homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
+            homeFragmentBinding.homeFragmentContent.visibility = View.VISIBLE
+        }
+
         setOnClickListeners()
         setUpTabLayout()
 
@@ -70,17 +66,69 @@ class HomeFragment : Fragment(), View.OnClickListener{
             signOut(appContainer.auth)
         }
     }
-
     private fun setUp() {
-        homeFragmentBinding = DataBindingUtil.bind(view?.findViewById(R.id.home_fragment_root)!!)!!
-
+       homeFragmentBinding = DataBindingUtil.bind(view?.findViewById(R.id.home_fragment_root)!!)!!
 
         appContainer = AppContainer(requireContext())
-        homeViewModel = appContainer.homeViewModel
         homeFragmentBinding.viewModel = homeViewModel
         homeFragmentBinding.lifecycleOwner = this
         navController = findNavController()
     }
+    private fun syncCacheWithServer() {
+        Log.d("Here", "syncCacheWithServer")
+        homeViewModel.getUserDataFromServer()
+        homeViewModel.userDataFromServerLiveData.observe(viewLifecycleOwner){ event->
+            event.getContentIfNotHandled()?.let { userInServer->
+                updateUserInCacheWithServerData(userInServer)
+            }
+        }
+    }
+
+    private fun syncChats(){
+        homeViewModel.getUserChatsFromBothServerAndCache()
+        homeViewModel.userChatsInServerLiveData.observe(viewLifecycleOwner){ userChatsInServerEvent->
+            userChatsInServerEvent.getContentIfNotHandled()?.let {
+                updateUserChatsInCache(it)
+            }
+        }
+    }
+
+    private fun updateUserChatsInCache(userChatsInServer: List<ChatRoom>?) {
+        homeViewModel.updateUserChatsInCache(userChatsInServer)
+        homeViewModel.updateUserChatsInCacheLiveData.observe(viewLifecycleOwner){ event->
+            event.getContentIfNotHandled()?.let { res->
+                if (!res.contains(-1L)){
+                    homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
+                    homeFragmentBinding.homeFragmentContent.visibility = View.VISIBLE
+                    Toast.makeText(requireContext(), "Sync is Successful", Toast.LENGTH_SHORT).show()
+
+                }else{
+                    homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
+                    homeFragmentBinding.homeFragmentContent.visibility = View.GONE
+                    homeFragmentBinding.syncFailed.visibility = View.VISIBLE
+                    Log.d("Here", "Sync Failed")
+                }
+            }
+        }
+    }
+
+    private fun updateUserInCacheWithServerData(serverData: User?) {
+        homeViewModel.updateUserInCacheWithServerData(serverData)
+        homeViewModel.updateUserDataInCacheResultLiveData.observe(viewLifecycleOwner){
+            it.getContentIfNotHandled()?.let { res->
+                if (res != -1L){
+                    syncChats()
+                }else{
+                    homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
+                    homeFragmentBinding.homeFragmentContent.visibility = View.GONE
+                    homeFragmentBinding.syncFailed.visibility = View.VISIBLE
+                    Log.d("Here", "Sync Failed")
+                }
+            }
+        }
+    }
+
+
 
     private fun setUpTabLayout() {
         fragmentsAdapter = FragmentsAdapter(childFragmentManager, lifecycle)

@@ -27,6 +27,8 @@ class ChatRoomViewModel @Inject constructor(
     val chatMessageLiveData = MutableLiveData<Event<Pair<Boolean, ChatMessage>>>()
     val chatMessagesLiveData = MutableLiveData<List<ChatMessage>>()
 
+    val addedMessagesToChatRoomLiveData = MutableLiveData<Event<ChatMessage>>()
+
     fun sendChatMessage(chatMessage: ChatMessage, docId: String) {
         chatRoomRepository.sendChatMessage(chatMessage, docId)
         chatRoomRepository.chatMessageLiveData.observeForever {
@@ -69,6 +71,13 @@ class ChatRoomViewModel @Inject constructor(
     fun deleteAllChatRooms(){
         viewModelScope.launch {
             localChatRoomRepository.deleteAllChatRooms()
+        }
+    }
+
+    fun listenForChatRoomChanges(docId: String) {
+        chatRoomRepository.listenForChatRoomChanges(docId)
+        chatRoomRepository.addedMessagesToChatRoomLiveData.observeForever {
+            addedMessagesToChatRoomLiveData.value = it
         }
     }
 }

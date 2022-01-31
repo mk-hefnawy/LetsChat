@@ -18,6 +18,10 @@ class RoomService @Inject constructor(@ApplicationContext val context: Context) 
     val userLiveData = MutableLiveData<List<User>>()
 
     val userProfilePictureLiveData = MutableLiveData<Event<Int>>()
+    val userDataInCacheLiveData = MutableLiveData<Event<User?>>()
+    val updateUserDataInCacheResultLiveData = MutableLiveData<Event<Long>>()
+
+    val updateUserChatsInCacheLiveData = MutableLiveData<Event<List<Long>>>()
 
     suspend fun addUserToRoom(user: User) {
         val isInsertSuccessful = AppRoomDatabase(context).authDao().addUser(user)
@@ -56,5 +60,24 @@ class RoomService @Inject constructor(@ApplicationContext val context: Context) 
     suspend fun updateProfilePictureUrlInCache(uploadImageUrl: String, currentUserId: String) {
         val result = AppRoomDatabase(context).authDao().updateProfilePictureUrlInCache(uploadImageUrl, currentUserId)
         userProfilePictureLiveData.value = Event(result)
+    }
+
+    suspend fun getUserDataFromCache(uid: String) {
+        val userInCache = AppRoomDatabase(context).authDao().getUser(uid)
+        if (userInCache.isNotEmpty())  userDataInCacheLiveData.value = Event(userInCache[0])
+        else userDataInCacheLiveData.value = Event(User("", "", "", ""))
+
+    }
+
+    suspend fun updateUserInCacheWithServerData(serverData: User?) {
+        serverData?.let { user->
+            val result: Long = AppRoomDatabase(context).authDao().addUser(user)
+            updateUserDataInCacheResultLiveData.value = Event(result)
+        }
+    }
+
+    suspend fun updateUserChatsInCache(userChatsInServer: List<ChatRoom>?) {
+        val result = AppRoomDatabase(context).chatRoomDao().cacheUserChats(userChatsInServer!!)
+        updateUserChatsInCacheLiveData.value = Event(result)
     }
 }

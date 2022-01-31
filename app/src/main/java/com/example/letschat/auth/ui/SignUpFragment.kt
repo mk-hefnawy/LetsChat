@@ -53,7 +53,7 @@ class SignUpFragment : Fragment(), View.OnClickListener {
 
         navController = findNavController()
 
-        signUpBinding = DataBindingUtil.setContentView(requireActivity(), R.layout.fragment_sign_up)
+        signUpBinding = DataBindingUtil.bind(view?.findViewById(R.id.sign_up_fragment_root)!!)!!
         signUpViewModel = appContainer.signUpViewModel
         signUpBinding.viewModel = signUpViewModel
         signUpBinding.lifecycleOwner = this

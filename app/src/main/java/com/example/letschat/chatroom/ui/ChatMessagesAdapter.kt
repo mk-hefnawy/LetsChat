@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
 
 class ChatMessagesAdapter @Inject constructor(val auth: FirebaseAuth) : RecyclerView.Adapter<ChatMessagesAdapter.ChatMessageHolder>() {
-    lateinit var chatMessages: ArrayList<ChatMessage>
+    var chatMessages =  ArrayList<ChatMessage>()
 
     companion object {
         const val CURRENT_USER_VIEW_TYPE = 0
@@ -85,6 +85,10 @@ class ChatMessagesAdapter @Inject constructor(val auth: FirebaseAuth) : Recycler
 
     fun addMessage(message: ChatMessage){
         chatMessages.add(message)
+    }
+
+    fun addMessages(messages: ArrayList<ChatMessage>){
+        chatMessages.addAll(messages)
     }
 
 }

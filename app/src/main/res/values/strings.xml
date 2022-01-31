@@ -30,6 +30,7 @@
     <string name="accept_friend_request">Accept Friend Request</string>
     <string name="no_chats">No Chats</string>
     <string name="no_friends">No Friends</string>
+    <string name="sync_failed">Sync Failed</string>
 
 
 </resources>

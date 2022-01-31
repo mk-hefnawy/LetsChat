@@ -1,6 +1,5 @@
 package com.example.letschat.chatroom.chat
 
-
 import java.util.Date
 
 data class ChatMessage(
@@ -8,4 +7,8 @@ data class ChatMessage(
     val receiverId: String,
     val message: String,
     val messageType: String,
-    val time: Date?)
+    val time: Date?){
+
+    // no-arg constructor for fire store to deserialize that class ( toObject(ChatMessage))
+    constructor(): this("", "", "", "", null)
+}

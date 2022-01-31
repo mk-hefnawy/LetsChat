@@ -46,4 +46,11 @@ class ChatsViewModel @Inject constructor(
         }
     }
 
+    fun getAllChatsFromServer() {
+        remoteChatsRepository.getAllChatsFromServer()
+        remoteChatsRepository.listOfLastMessagesForEachChatLiveData.observeForever {
+            listOfLastMessagesForEachChatLiveData.value= it
+        }
+    }
+
 }
