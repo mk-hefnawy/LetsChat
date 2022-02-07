@@ -8,25 +8,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.letschat.R
 import com.example.letschat.auth.models.SignUpResultModel
+import com.example.letschat.auth.usecases.SyncUseCase
 import com.example.letschat.auth.view_models.SignUpViewModel
 import com.example.letschat.databinding.FragmentSignUpBinding
 import com.example.letschat.di.AppContainer
+import com.example.letschat.home.view_models.HomeViewModel
+import com.example.letschat.other.SIGNUP
 import com.example.letschat.user.User
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SignUpFragment : Fragment(), View.OnClickListener {
     private lateinit var appContainer: AppContainer
     private lateinit var signUpBinding: FragmentSignUpBinding
     private lateinit var signUpViewModel: SignUpViewModel
     private lateinit var navController: NavController
 
+    val homeViewModel: HomeViewModel by viewModels()
     companion object {
         private const val TAG = "SignUpFragment"
     }
@@ -151,11 +159,7 @@ class SignUpFragment : Fragment(), View.OnClickListener {
     }
 
     private fun updateUiForLoggedInUser() {
-        goToHomeFragment()
-    }
-
-    private fun goToHomeFragment() {
-        navController.navigate(SignUpFragmentDirections.actionSignUpToHome())
+        SyncUseCase(requireContext() ,viewLifecycleOwner, homeViewModel, findNavController(), SIGNUP)
     }
 
     private fun showPasswordError(message: String) {

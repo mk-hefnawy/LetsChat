@@ -51,14 +51,6 @@ class HomeFragment : Fragment(), View.OnClickListener{
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUp()
-        if (!hasFragmentBeenVisible){
-            syncCacheWithServer()
-        }else{
-            hasFragmentBeenVisible = true
-            homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
-            homeFragmentBinding.homeFragmentContent.visibility = View.VISIBLE
-        }
-
         setOnClickListeners()
         setUpTabLayout()
 
@@ -74,59 +66,8 @@ class HomeFragment : Fragment(), View.OnClickListener{
         homeFragmentBinding.lifecycleOwner = this
         navController = findNavController()
     }
-    private fun syncCacheWithServer() {
-        Log.d("Here", "syncCacheWithServer")
-        homeViewModel.getUserDataFromServer()
-        homeViewModel.userDataFromServerLiveData.observe(viewLifecycleOwner){ event->
-            event.getContentIfNotHandled()?.let { userInServer->
-                updateUserInCacheWithServerData(userInServer)
-            }
-        }
-    }
 
-    private fun syncChats(){
-        homeViewModel.getUserChatsFromBothServerAndCache()
-        homeViewModel.userChatsInServerLiveData.observe(viewLifecycleOwner){ userChatsInServerEvent->
-            userChatsInServerEvent.getContentIfNotHandled()?.let {
-                updateUserChatsInCache(it)
-            }
-        }
-    }
 
-    private fun updateUserChatsInCache(userChatsInServer: List<ChatRoom>?) {
-        homeViewModel.updateUserChatsInCache(userChatsInServer)
-        homeViewModel.updateUserChatsInCacheLiveData.observe(viewLifecycleOwner){ event->
-            event.getContentIfNotHandled()?.let { res->
-                if (!res.contains(-1L)){
-                    homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
-                    homeFragmentBinding.homeFragmentContent.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), "Sync is Successful", Toast.LENGTH_SHORT).show()
-
-                }else{
-                    homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
-                    homeFragmentBinding.homeFragmentContent.visibility = View.GONE
-                    homeFragmentBinding.syncFailed.visibility = View.VISIBLE
-                    Log.d("Here", "Sync Failed")
-                }
-            }
-        }
-    }
-
-    private fun updateUserInCacheWithServerData(serverData: User?) {
-        homeViewModel.updateUserInCacheWithServerData(serverData)
-        homeViewModel.updateUserDataInCacheResultLiveData.observe(viewLifecycleOwner){
-            it.getContentIfNotHandled()?.let { res->
-                if (res != -1L){
-                    syncChats()
-                }else{
-                    homeFragmentBinding.homeFragmentProgressBar.visibility = View.GONE
-                    homeFragmentBinding.homeFragmentContent.visibility = View.GONE
-                    homeFragmentBinding.syncFailed.visibility = View.VISIBLE
-                    Log.d("Here", "Sync Failed")
-                }
-            }
-        }
-    }
 
 
 

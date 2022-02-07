@@ -62,6 +62,32 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
         private const val PICK_IMAGE = 500
     }
 
+    override fun onResume() {
+        super.onResume()
+        Log.d("Here", "Base Activity onResume")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("Here", "Base Activity on Start")
+        //observeAllChats()
+        // listenToChatsChanges() // so when our app is in the bg (in the ram), the listening would not be going on.
+    }
+    override fun onPause() {
+        super.onPause()
+        Log.d("Here", "Base Activity on Pause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("Here", "Base Activity onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("Here", "Base Activity onDestroy")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -87,11 +113,7 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
         chatsViewModel.getAllChatsFromCache()
     }
 
-    override fun onStart() {
-        super.onStart()
-        //observeAllChats()
-       // listenToChatsChanges() // so when our app is in the bg (in the ram), the listening would not be going on.
-    }
+
 
     private fun listenToChatsChanges(){
         baseViewModel.listenToChatsChanges()
@@ -174,8 +196,9 @@ class BaseActivity : AppCompatActivity(), View.OnClickListener {
                         View.VISIBLE
 
                     // el mo4kla kda en kol ma el home fragment tegy lel forground, hro7 ageb el user info
-                    //getUserForDrawer()
-                    //observeUserForDrawer() // lazm yb2o b3d el sync bta3 el home
+                    //Toast.makeText(this, "getUserForDrawer", Toast.LENGTH_SHORT).show()
+                    getUserForDrawer()
+                    observeUserForDrawer() // lazm yb2o b3d el sync bta3 el home
                 }
 
                 R.id.settingsFragment -> {

@@ -35,7 +35,7 @@
         <action
             android:id="@+id/action_loginToHome"
             app:destination="@id/homeFragment"
-            app:popUpTo="@id/homeFragment"
+            app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
 
         <action
@@ -53,7 +53,7 @@
         <action
             android:id="@+id/actionSignUpToHome"
             app:destination="@id/homeFragment"
-            app:popUpTo="@id/homeFragment"
+            app:popUpTo="@id/signUpFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/actionSignUpToLogin"

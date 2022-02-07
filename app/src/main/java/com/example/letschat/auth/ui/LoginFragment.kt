@@ -8,19 +8,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.letschat.R
+import com.example.letschat.auth.usecases.SyncUseCase
 import com.example.letschat.auth.view_models.LoginViewModel
+import com.example.letschat.chatroom.chat.ChatRoom
 import com.example.letschat.databinding.FragmentLoginBinding
 import com.example.letschat.di.AppContainer
+import com.example.letschat.home.view_models.HomeViewModel
+import com.example.letschat.other.LOGIN
+import com.example.letschat.user.User
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginFragment : Fragment(), View.OnClickListener {
     private lateinit var loginFragmentBinding: FragmentLoginBinding
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var appContainer: AppContainer
 
+    val homeViewModel: HomeViewModel by viewModels()
 
     companion object {
         const val TAG = "LoginFragmentHere"
@@ -46,7 +55,8 @@ class LoginFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setUp() {
-        loginFragmentBinding =  DataBindingUtil.bind(view?.findViewById(R.id.login_fragment_root)!!)!!
+        loginFragmentBinding =
+            DataBindingUtil.bind(view?.findViewById(R.id.login_fragment_root)!!)!!
         appContainer = AppContainer(requireContext())
 
         loginViewModel = appContainer.loginViewModel
@@ -96,16 +106,12 @@ class LoginFragment : Fragment(), View.OnClickListener {
         if (isLoginSuccessful) { // can't be without the (== true) because its a Boolean? not Boolean
             Toast.makeText(requireContext(), "Login was successful", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "Login was Successful")
-            goToHomeFragment()
+            SyncUseCase(requireContext() ,viewLifecycleOwner, homeViewModel, findNavController(), LOGIN)
+
         } else {
             Toast.makeText(requireContext(), "Login failed", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "Login failed")
         }
-    }
-
-    private fun goToHomeFragment() {
-        Log.d("Here", "Going To Home From Login")
-        findNavController().navigate(LoginFragmentDirections.actionLoginToHome())
     }
 
     private fun showPasswordError(message: String) {

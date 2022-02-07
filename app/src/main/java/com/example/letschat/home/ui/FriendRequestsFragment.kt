@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.letschat.R
+import com.example.letschat.chatroom.chat.ChatRoomViewModel
 import com.example.letschat.databinding.FragmentFriendRequestsBinding
 import com.example.letschat.di.AppContainer
 import com.example.letschat.home.adapters.GenericFriendsAdapter
@@ -23,8 +25,12 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
     private lateinit var binding: FragmentFriendRequestsBinding
     private lateinit var viewModel: FriendRequestsViewModel
 
+    private lateinit var userBeingReactedToTheirFriendRequestId: String
+
     @Inject
     lateinit var adapter: GenericFriendsAdapter
+
+    val chatRoomViewModel: ChatRoomViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +47,7 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
         setUp()
         observeFriendRequests()
         observeFriendRequestReaction()
+        observeJustCreatedChatDocument()
     }
 
     private fun setUp() {
@@ -75,10 +82,33 @@ class FriendRequestsFragment : Fragment(), IGenericFriends {
         viewModel.friendRequestReactionLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let {
                 if (it.result) {
-                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
-                    removeFriendRequestFromRecyclerView(it.uid)
+                    userBeingReactedToTheirFriendRequestId = it.uid
+                    if (it.accept){
+                        cacheJustCreatedChatDocument(it.uid, it.docId)
+
+                    }else{
+                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                        removeFriendRequestFromRecyclerView(it.uid)
+                    }
+
+                    // wait
+
                 } else {
                     Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+    private fun cacheJustCreatedChatDocument(uid: String, docId: String){
+        chatRoomViewModel.cacheJustCreatedDocumentId(uid, docId)
+    }
+
+    private fun observeJustCreatedChatDocument(){
+        chatRoomViewModel.justCachedRoomChatDocumentResult.observe(viewLifecycleOwner, { cacheResult ->
+            cacheResult.getContentIfNotHandled()?.let { roomDatabaseInsertResponse ->
+                if (roomDatabaseInsertResponse != -1L) {
+                    Toast.makeText(requireContext(), "Friend Request Accepted Successfully", Toast.LENGTH_SHORT).show()
+                    removeFriendRequestFromRecyclerView(userBeingReactedToTheirFriendRequestId)
                 }
             }
         })

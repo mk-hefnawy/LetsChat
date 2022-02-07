@@ -67,6 +67,8 @@ class FireBaseService @Inject constructor(
         var result = true
         lateinit var message: String
         var uid = ""
+        var accept = false
+        var docId = ""
     }
 
     object UploadImageObject {
@@ -424,13 +426,16 @@ class FireBaseService @Inject constructor(
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
 
-                    obj.message = "Friend Request Accepted Successfully"
+
                     obj.uid = uid
                     if (eventType == "accept") {
-                        friendRequestReactionLiveData.value =
-                            Event(obj)
+                        obj.message = "Friend Request Accepted Successfully"
+                        obj.accept = true
+                        createChatDocumentForBothUsers(uid)
+
                     } else {
                         obj.message = "Friend Request Declined Successfully"
+                        obj.accept = false
                         friendRequestReactionLiveData.value =
                             Event(obj)
                     }
@@ -438,6 +443,21 @@ class FireBaseService @Inject constructor(
                 } else {
                     Log.d("Here", "Error Removing Request")
                 }
+            }
+    }
+
+    private fun createChatDocumentForBothUsers(uid: String) {
+        val hash = hashMapOf(
+            "firstUserId" to auth.currentUser!!.uid,
+            "secondUserId" to uid
+        )
+        usersReference.document(auth.currentUser!!.uid).collection("chats").add(hash)
+            .addOnSuccessListener { doc ->
+                val docId = doc.id
+                usersReference.document(uid).collection("chats").document(docId).set(hash)
+                    .addOnSuccessListener {
+                        addChatToBothUsersWithoutMessage(docId, uid)
+                    }
             }
     }
 
@@ -569,6 +589,25 @@ class FireBaseService @Inject constructor(
                 usersReference.document(otherUserId).update(CHATS, FieldValue.arrayUnion(chatDocId))
                     .addOnSuccessListener {
                         chatRoomDocumentId.value = Event(Pair(chatDocId, firstChatMessage))
+                    }.addOnFailureListener {
+                        it.printStackTrace()
+                    }
+            }.addOnFailureListener {
+                it.printStackTrace()
+            }
+    }
+
+    private fun addChatToBothUsersWithoutMessage(
+        chatDocId: String,
+        otherUserId: String,
+    ) {
+        usersReference.document(auth.currentUser!!.uid)
+            .update(CHATS, FieldValue.arrayUnion(chatDocId)).addOnSuccessListener {
+                usersReference.document(otherUserId).update(CHATS, FieldValue.arrayUnion(chatDocId))
+                    .addOnSuccessListener {
+                        obj.docId = chatDocId
+                        friendRequestReactionLiveData.value =
+                            Event(obj)
                     }.addOnFailureListener {
                         it.printStackTrace()
                     }
@@ -770,17 +809,17 @@ class FireBaseService @Inject constructor(
     fun listenForChatRoomChanges(docId: String) {
         usersReference.document(auth.currentUser!!.uid).collection("chats").document(docId)
             .collection("messages").addSnapshotListener { snapShot, e ->
-            if (e != null) {
-                e.printStackTrace()
-            }
-            for (dc in snapShot!!.documentChanges) {
-                when (dc.type) {
-                    DocumentChange.Type.ADDED -> addedMessagesToChatRoomLiveData.value =
-                        Event(dc.document.toObject(ChatMessage::class.java))
+                if (e != null) {
+                    e.printStackTrace()
                 }
-            }
+                for (dc in snapShot!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> addedMessagesToChatRoomLiveData.value =
+                            Event(dc.document.toObject(ChatMessage::class.java))
+                    }
+                }
 
-        }
+            }
     }
 
     fun getUserDataFromServer() {
@@ -809,11 +848,15 @@ class FireBaseService @Inject constructor(
     fun getUserChatsFromServer() {
         val userChats = mutableListOf<ChatRoom>()
         usersReference.document(auth.currentUser!!.uid).collection("chats").get()
-            .addOnSuccessListener { documents->
+            .addOnSuccessListener { documents ->
                 documents.forEach { queryDocSnapshot ->
-                    userChats.add(ChatRoom(queryDocSnapshot.get("firstUserId").toString(),
-                        queryDocSnapshot.get("secondUserId").toString(),
-                        queryDocSnapshot.id))
+                    userChats.add(
+                        ChatRoom(
+                            queryDocSnapshot.get("firstUserId").toString(),
+                            queryDocSnapshot.get("secondUserId").toString(),
+                            queryDocSnapshot.id
+                        )
+                    )
                 }
                 userChatsInServerLiveData.value = Event(userChats)
 

@@ -105,9 +105,11 @@
                 android:id="@+id/room_send"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 android:layout_weight="1"
                 android:src="@drawable/outline_send_black_36"
-                android:tint="@color/primaryColor" />
+                android:tint="@color/primaryColor"
+                />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

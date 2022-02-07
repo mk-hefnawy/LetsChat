@@ -33,9 +33,10 @@ import kotlin.collections.ArrayList
 @AndroidEntryPoint
 class ChatRoomFragment : Fragment(), View.OnClickListener {
     lateinit var binding: FragmentChatRoomBinding
-    lateinit var chattingUser: User
 
-    lateinit var query: Query
+    lateinit var chattingUser: User
+    lateinit var chatDocId: String
+
 
     @Inject
     lateinit var messageValidator: Validator
@@ -52,12 +53,16 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUp()
         receiveArguments()
-        setUpClickListeners()
         showChattingUserInfo()
+
+        // for first time
+        // observeChatDocument()
+
         observeMessageEditTextChanges()
         observeChatDocumentId()
         observeChatMessageLiveData()
@@ -66,7 +71,7 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
     }
 
     private fun observeAddedMessagesToChatRoom() {
-        viewModel.addedMessagesToChatRoomLiveData.observe(viewLifecycleOwner){ res ->
+        viewModel.addedMessagesToChatRoomLiveData.observe(viewLifecycleOwner) { res ->
             res.getContentIfNotHandled()?.let {
                 Log.d("Here", "Message Added")
                 adapter.addMessage(it)
@@ -84,20 +89,16 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
     private fun observeChatDocumentId() {
         viewModel.chatRoomDocIdLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let {
-                if (it.isEmpty()) {
-                    // no chat happened between those users before
-                    showNoPreviousMessages()
+                chatDocId = it[0]
+                // get previous messages if exist
 
-                } else {
-                    // there was a chat before
-                    Log.d("Here", "Getting Previous Messages")
-                    showPreviousMessages(it[0])
-                    listenForChatRoomChanges(it[0])
+                getPreviousMessages(it[0])
+                listenForChatRoomChanges(it[0])
 
-                }
-                viewModel.chatRoomDocIdLiveData.removeObservers(viewLifecycleOwner)
             }
-        })
+            viewModel.chatRoomDocIdLiveData.removeObservers(viewLifecycleOwner)
+        }
+        )
         // why removing the observer? because we have two observers on the same live data of Event
         // which does not support multiple observers
 
@@ -107,16 +108,14 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         viewModel.listenForChatRoomChanges(chatDocId)
     }
 
-    private fun showPreviousMessages(docId: String) {
+    private fun getPreviousMessages(docId: String) {
         viewModel.getAllPreviousMessages(docId)
-        viewModel.chatMessagesLiveData.observe(viewLifecycleOwner, {
-
-            adapter.setMessages(it as ArrayList<ChatMessage>)
-            binding.messagesRecyclerView.adapter = adapter
-            val manager = LinearLayoutManager(requireContext())
-            manager.stackFromEnd = true
-            binding.messagesRecyclerView.layoutManager = manager
-            binding.chatRoomProgressBar.visibility = View.GONE
+        viewModel.chatMessagesLiveData.observe(viewLifecycleOwner, { messages ->
+            if (messages.isEmpty()) {
+                showNoPreviousMessages()
+            } else {
+                showPreviousMessages(messages)
+            }
         })
     }
 
@@ -124,6 +123,20 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         binding.chatRoomProgressBar.visibility = View.GONE
         binding.messagesRecyclerView.visibility = View.GONE
         binding.noPreviousMessages.visibility = View.VISIBLE
+        binding.roomSend.isEnabled = true
+        binding.roomSend.setOnClickListener(this)
+
+    }
+
+    private fun showPreviousMessages(messages: List<ChatMessage>) {
+        binding.chatRoomProgressBar.visibility = View.GONE
+        adapter.setMessages(messages as ArrayList<ChatMessage>)
+        binding.messagesRecyclerView.adapter = adapter
+        val manager = LinearLayoutManager(requireContext())
+        manager.stackFromEnd = true
+        binding.messagesRecyclerView.layoutManager = manager
+        binding.roomSend.isEnabled = true
+        binding.roomSend.setOnClickListener(this)
     }
 
     private fun setUp() {
@@ -148,21 +161,28 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
         chattingUser = chatUser
     }
 
-    private fun setUpClickListeners() {
-        //binding.chatRoomBack.setOnClickListener(this)
-        binding.roomSend.setOnClickListener(this)
-    }
-
     private fun observeMessageEditTextChanges() {
         binding.roomMessageEditText.addTextChangedListener {
             object : TextWatcher {
 
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    binding.roomSend.isEnabled = p0.toString().trim().isNotEmpty()
+                    if (binding.roomMessageEditText.text.toString().trim().isEmpty()) {
+                        binding.roomSend.isEnabled = false
+                        binding.roomSend.setOnClickListener(null)
+                    }else{
+                        binding.roomSend.isEnabled = true
+                        binding.roomSend.setOnClickListener(this@ChatRoomFragment)
+                    }
+
+                    //binding.roomSend.setCl
+                    // binding.roomSend.isClickable = binding.roomMessageEditText.text.toString().trim().isNotEmpty()
                 }
 
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-                override fun afterTextChanged(p0: Editable?) {}
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                }
+
+                override fun afterTextChanged(p0: Editable?) {
+                }
 
             }
         }
@@ -179,31 +199,25 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun onSendClicked() {
         Log.d("Here", "Send Clicked")
-        getChatDocument(chattingUser)
+        binding.roomSend.isEnabled = false
+        binding.roomSend.setOnClickListener(null)
+        sendChatMessage(chatDocId)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun observeChatDocument() {
         viewModel.chatRoomDocIdLiveData.observe(viewLifecycleOwner, { result ->
             result.getContentIfNotHandled()?.let {
                 if (it.isEmpty()) {
                     Log.d("Here", "Document Doesn't exist, init it")
-                    sendFirstMessage()
+                    // sendFirstMessage()
                 } else {
                     Log.d("Here", "Document exists")
                     val docId = it[0]
-                    sendChatMessage(docId)
+                    //sendChatMessage(docId)
 
                 }
 
-            }
-        })
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun sendFirstMessage() {
-        val chatMessage =
-            ChatMessage("", chattingUser.uid, viewModel.message, "text", Date())
-        viewModel.sendFirstMessage(chatMessage)
-        viewModel.justCreatedChatRoomDocumentIdLiveData.observe(this, { result ->
-            result.getContentIfNotHandled()?.let { (docId, message) ->
-                cacheJustCreatedDocumentId(chattingUser.uid, docId, message)
             }
         })
     }
@@ -215,37 +229,8 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun cacheJustCreatedDocumentId(
-        chattingUserId: String,
-        docId: String,
-        chatMessage: ChatMessage
-    ) {
-        viewModel.cacheJustCreatedDocumentId(chattingUserId, docId)
-        viewModel.justCachedRoomChatDocumentResult.observe(this, { cacheResult ->
-            cacheResult.getContentIfNotHandled()?.let { roomDatabaseInsertResponse ->
-                if (roomDatabaseInsertResponse != -1L) {
-                    // doc cached successfully
-                    // just init
-                    //adapter.setMessages(arrayListOf())
-                    //addNewMessageToAdapter(chatMessage)
-                   // adapter.notifyDataSetChanged()
-                    binding.messagesRecyclerView.visibility = View.VISIBLE
-                    binding.noPreviousMessages.visibility = View.GONE
-                    binding.roomMessageEditText.setText("")
-                    Toast.makeText(
-                        requireContext(),
-                        "First Message Sent Successfully",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        })
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun sendChatMessage(docId: String) {
-        val chatMessage =
-            ChatMessage("", chattingUser.uid, viewModel.message, "text", Date())
+        val chatMessage = ChatMessage("", chattingUser.uid, viewModel.message, "text", Date())
         viewModel.sendChatMessage(chatMessage, docId)
     }
 
@@ -254,13 +239,19 @@ class ChatRoomFragment : Fragment(), View.OnClickListener {
             result.getContentIfNotHandled()?.let { (res, chatMessage) ->
                 if (res) {
                     //addNewMessageToAdapter(chatMessage)
+                    binding.messagesRecyclerView.visibility = View.VISIBLE
+                    binding.noPreviousMessages.visibility = View.GONE
                     binding.roomMessageEditText.setText("")
+                    binding.roomSend.isEnabled = true
+                    binding.roomSend.setOnClickListener(this)
                     Toast.makeText(
                         requireContext(),
                         "Message Sent Successfully",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
+                    binding.roomSend.isEnabled = true
+                    binding.roomSend.setOnClickListener(this)
                     Toast.makeText(
                         requireContext(),
                         "Error while sending the message",
