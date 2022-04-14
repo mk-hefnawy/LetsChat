@@ -4,6 +4,7 @@
 * [Architecture](#architecture)
 * [Technologies](#technologies)
 * [Demo](#demo)
+* [Download](#download)
 
 ## General Info
 Chatting android application in which the user can create an account, add friends, search for friends with user name, accept/reject friend requests, and of course chat with friends in real-time.
@@ -37,3 +38,5 @@ This layer contains the ResponseObjects, Data sources, and the Repository. It ge
 ## Demo
 Working on it.
 
+## Download
+APK download link : https://www.mediafire.com/file/ncjm9e8uc6az2vv/LetsChat.apk/file
